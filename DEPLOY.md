@@ -23,12 +23,12 @@ image (~1 min deploys).
 |---|---|
 | `.github/workflows/docker-image.yml` | CI: builds + pushes the image to GHCR on every push to `main` |
 | `Dockerfile` | Builds server + WebUI into one image |
-| `docker-compose.yml` | Coolify resource — pulls `ghcr.io/gitikram/stalwart:main` |
+| `docker-compose.yml` | Coolify resource — pulls `ghcr.io/devfazla/stalwart:main` |
 | `.dockerignore` | Keeps the build context to what's needed |
 
 ## Prerequisites
 
-1. This repo on GitHub (`gitikram/stalwart`) — CI runs automatically on push.
+1. This repo on GitHub (`devfazla/stalwart`) — CI runs automatically on push.
 2. **VPS sizing**: running Stalwart is light (~0.5–1 GB RAM + mail storage). Any
    1–2 GB VPS works when using the CI image. (Only *building* on the VPS needs
    4 GB+ — see the alternative below.)
@@ -48,7 +48,7 @@ image (~1 min deploys).
 ## Deploy steps
 
 1. Wait for the CI run to finish: GitHub repo → **Actions** → "Build Docker image"
-   green, and the image exists at `ghcr.io/gitikram/stalwart:main`.
+   green, and the image exists at `ghcr.io/devfazla/stalwart:main`.
 2. Make the GHCR package public (or set up registry credentials, see Prerequisites).
 3. Coolify dashboard → your project → **New Resource → Docker Compose**.
 4. Select the repo + branch. Compose file: `./docker-compose.yml`.

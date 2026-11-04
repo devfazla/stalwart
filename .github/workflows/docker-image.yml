@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: ghcr.io/gitikram/stalwart
+  IMAGE: ghcr.io/devfazla/stalwart
 
 jobs:
   # Build each architecture on a NATIVE runner (amd64 on x86, arm64 on ARM).
