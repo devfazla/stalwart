@@ -3,9 +3,18 @@
 # In Coolify: New Resource -> Docker Compose -> pick this repo/branch,
 # compose file: ./docker-compose.yml
 #
-# After deploy, assign the domain to the "stalwart" service using the
-# container's HTTP port, e.g.:  https://mail.example.com:8080
-# (the trailing :8080 tells Coolify which container port to proxy).
+# Two services share this file:
+#   stalwart  — the mail server (admin UI, JMAP, IMAP/SMTP/…), domain
+#               https://mail.shopstatesideglobal.com
+#   webmail   — Relay Mail, the browser client, domain
+#               https://webmail.shopstatesideglobal.com
+#
+# Assign each domain to its service using the container's HTTP port, e.g.
+# https://mail.example.com:8080 and https://webmail.example.com:3000
+# (the trailing port tells Coolify which container port to proxy).
+#
+# Neither service's HTTP port is published on the host, and no volume is
+# shared between them, so starting webmail cannot disturb the server's data.
 
 services:
   stalwart:
@@ -64,6 +73,93 @@ services:
         max-size: "50m"
         max-file: "5"
 
+  webmail:
+    # Relay Mail (vendored from Bulwark Webmail, AGPL-3.0-only) lives in ./webmail.
+    # Default: pull the image built by .github/workflows/docker-image-webmail.yml,
+    # which only runs on pushes that touch webmail/. It is multi-arch, so the same
+    # tag runs on amd64 and arm64 VPSes.
+    image: ghcr.io/devfazla/relay-webmail:main
+
+    # Alternative: build on the server instead of pulling. Needs ~2GB RAM and a
+    # few minutes, and Coolify's default build timeout is enough. The image is
+    # also what the About screen reads GIT_COMMIT from, so a local build shows
+    # "unknown" unless you pass it: GIT_COMMIT=$(git rev-parse HEAD) docker
+    # compose build webmail
+    # build:
+    #   context: ./webmail
+    #   dockerfile: Dockerfile
+    #   args:
+    #     GIT_COMMIT: ${GIT_COMMIT:-unknown}
+
+    # HTTP only, reached through Coolify's proxy — never published on the host,
+    # so it cannot collide with the server's 8080 or a port already in use.
+    expose:
+      - "3000"
+
+    environment:
+      APP_NAME: Relay Mail
+      APP_SHORT_NAME: Relay
+      LOGIN_COMPANY_NAME: Relay Mail
+      SOURCE_CODE_URL: https://github.com/devfazla/stalwart
+
+      # Where the browser (and this container, for sign-in checks) finds the mail
+      # server. Must be the public URL: webmail talks JMAP from the browser, so
+      # Stalwart has to list https://webmail.shopstatesideglobal.com under
+      # Settings > HTTP > CORS allowed origins, or requests are blocked.
+      JMAP_SERVER_URL: https://mail.shopstatesideglobal.com
+
+      # Everything below keeps the client on infrastructure we control.
+      # The upstream default is fail-closed, but naming each switch here means a
+      # future config.json edit cannot silently reopen a third-party host.
+      NO_THIRD_PARTY_TRAFFIC: "true"   # fences telemetry, update check, push relay,
+                                        # marketplace directory, icon/translation proxies
+      BULWARK_TELEMETRY: "off"         # locks the heartbeat and hides the admin toggle
+      BULWARK_UPDATE_CHECK: "off"      # no version probe, no "update available" banner
+
+      # SESSION_SECRET is deliberately unset: the app generates one on first boot
+      # and keeps it in relay-admin-state, so it survives upgrades without ever
+      # sitting in this file. Set it only if you want to control the value.
+      # SESSION_SECRET: replace-with-at-least-32-random-characters
+
+      # Reverse proxy depth for the client IP in audit logs and rate limits.
+      TRUSTED_PROXY_DEPTH: "1"
+
+      # The webmail's own admin dashboard (/admin) is separate from Stalwart's.
+      # Unset means that dashboard stays disabled; a Stalwart admin account can
+      # still reach it (STALWART_ADMIN_ACCESS=auto).
+      # ADMIN_PASSWORD: change-me
+
+      LOG_FORMAT: json
+      LOG_LEVEL: info
+
+    volumes:
+      # All six are webmail's own; none of them touch the server's volumes.
+      - relay-settings:/app/data/settings              # encrypted user settings
+      - relay-admin:/app/data/admin                    # config.json, themes, branding
+      - relay-admin-state:/app/data/admin-state        # audit log, setup token, session secret
+      - relay-telemetry:/app/data/telemetry            # instance id + consent (unused while telemetry is off)
+      - relay-plugin-secrets:/app/data/plugin-secrets  # users' saved plugin credentials
+      - relay-version-check:/app/data/version-check    # last update-check result
+
+    depends_on:
+      # Order only — webmail stays useful if the server restarts, and this does
+      # not make a server failure take the client down with it.
+      - stalwart
+
+    restart: unless-stopped
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
 volumes:
   stalwart-config:
   stalwart-data:
+  relay-settings:
+  relay-admin:
+  relay-admin-state:
+  relay-telemetry:
+  relay-plugin-secrets:
+  relay-version-check:
