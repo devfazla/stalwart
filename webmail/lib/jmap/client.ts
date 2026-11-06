@@ -621,7 +621,7 @@ const ADDRESS_BOOK_PROPERTIES = [
   "myRights",
 ] as const;
 
-// The Principal properties Bulwark reads. 0.16's default list is the same;
+// The Principal properties Relay Mail reads. 0.16's default list is the same;
 // 1.0's adds `capabilities` for every principal and `accounts`, a whole
 // account object with every account capability for the user, their groups
 // and sharers.
@@ -670,7 +670,7 @@ const SIEVE_SCRIPT_PROPERTIES = ["id", "name", "blobId", "isActive"] as const;
 // administrator has directory queries off (jmap/src/principal/query.rs). A
 // role without the permission gets `forbidden` too, as "You are not
 // authorized to perform this action", so only the wording tells the two
-// apart; it picks the explanation shown, never what Bulwark does.
+// apart; it picks the explanation shown, never what Relay Mail does.
 const DIRECTORY_QUERIES_OFF = "The administrator has disabled directory queries.";
 
 /**
@@ -5982,7 +5982,7 @@ export class JMAPClient implements IJMAPClient {
 
     const lines: string[] = [
       'BEGIN:VCALENDAR',
-      'PRODID:-//Bulwark Mail//Bulwark Webmail//EN',
+      'PRODID:-//Relay Mail//Relay Mail//EN',
       'VERSION:2.0',
       'CALSCALE:GREGORIAN',
       'METHOD:REPLY',
@@ -6171,7 +6171,7 @@ export class JMAPClient implements IJMAPClient {
 
     const lines: string[] = [
       'BEGIN:VCALENDAR',
-      'PRODID:-//Bulwark Mail//Bulwark Webmail//EN',
+      'PRODID:-//Relay Mail//Relay Mail//EN',
       'VERSION:2.0',
       'CALSCALE:GREGORIAN',
       'METHOD:REQUEST',
@@ -6349,7 +6349,7 @@ export class JMAPClient implements IJMAPClient {
 
     const lines: string[] = [
       'BEGIN:VCALENDAR',
-      'PRODID:-//Bulwark Mail//Bulwark Webmail//EN',
+      'PRODID:-//Relay Mail//Relay Mail//EN',
       'VERSION:2.0',
       'CALSCALE:GREGORIAN',
       'METHOD:CANCEL',
@@ -8148,7 +8148,7 @@ export class JMAPClient implements IJMAPClient {
    */
   private metadataUnsupported = new Map<string, number>();
 
-  /** Whether Bulwark may keep data in this account's Inbox metadata (lib/jmap/bulwark-metadata.ts). */
+  /** Whether Relay Mail may keep data in this account's Inbox metadata (lib/jmap/bulwark-metadata.ts). */
   supportsBulwarkMetadata(accountId?: string): boolean {
     const id = accountId || this.accountId;
     const failedAt = this.metadataUnsupported.get(id);
@@ -8157,7 +8157,7 @@ export class JMAPClient implements IJMAPClient {
   }
 
   /**
-   * Bulwark's metadata entries of the account's Inbox, by key, shared or the
+   * Relay Mail's metadata entries of the account's Inbox, by key, shared or the
    * user's private ones. Null when the server has no usable metadata.
    */
   async getBulwarkMetadata(accountId?: string, options?: { private?: boolean }): Promise<Record<string, unknown> | null> {
@@ -8189,7 +8189,7 @@ export class JMAPClient implements IJMAPClient {
   private metadataInboxIds = new Map<string, string>();
 
   /**
-   * Writes one Bulwark metadata entry of the account's Inbox (null removes
+   * Writes one Relay Mail metadata entry of the account's Inbox (null removes
    * it), leaving every other entry as it is. Throws MetadataTooLargeError
    * when the server refuses the size, MetadataUnsupportedError when the
    * account has no metadata.
@@ -8215,7 +8215,7 @@ export class JMAPClient implements IJMAPClient {
   }
 
   /**
-   * Changes values inside one Bulwark metadata entry of the account's Inbox
+   * Changes values inside one Relay Mail metadata entry of the account's Inbox
    * and nothing else: each patch path (segments, escaped here) is set, null
    * removes it, an empty path is the whole entry. Returns the Mailbox state
    * after the change, so a caller can recognise the push of its own write.

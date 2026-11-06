@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 
-// Bulwark service worker.
+// Relay Mail service worker.
 //
 // This SW does two jobs:
 //   1. Satisfy the PWA installability requirement (a fetch handler that
@@ -164,12 +164,12 @@ async function cachedDocument(url) {
 }
 
 /**
- * The cache of the build that answered (the X-Bulwark-Build header): after a
+ * The cache of the build that answered (the X-Relay-Build header): after a
  * deploy the old worker still fetches the new build's pages and chunks, which
  * belong in the new build's cache, not in its own.
  */
 function shellCacheFor(response) {
-  const build = response.headers.get("x-bulwark-build") || "";
+  const build = response.headers.get("x-relay-build") || "";
   return /^[\w.-]{1,80}$/.test(build) ? SHELL_CACHE_PREFIX + build : SHELL_CACHE;
 }
 
@@ -1257,8 +1257,8 @@ async function handleOpenMailtoInClient(event) {
 
 async function showMailtoFocusNotification(state) {
   try {
-    await self.registration.showNotification(state.focusNotificationTitle || "Bulwark", {
-      body: state.focusNotificationBody || "The request was opened in Bulwark. Click to bring it to the front.",
+    await self.registration.showNotification(state.focusNotificationTitle || "Relay Mail", {
+      body: state.focusNotificationBody || "The request was opened in Relay Mail. Click to bring it to the front.",
       tag: "bulwark-mailto-focus",
       icon: `${BASE_PATH}/api/pwa-icon/192`,
       badge: `${BASE_PATH}/api/pwa-icon/192`,

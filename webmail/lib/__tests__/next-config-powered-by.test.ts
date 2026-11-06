@@ -13,7 +13,7 @@ afterEach(() => {
 });
 
 describe('X-Powered-By header', () => {
-  it('names Bulwark instead of Next.js, without a version', async () => {
+  it('is not emitted at all, so no build identity leaks in a response header', async () => {
     const config = await loadConfig();
     const rules = (await config.headers?.()) ?? [];
     const poweredBy = rules.flatMap((rule) =>
@@ -23,7 +23,7 @@ describe('X-Powered-By header', () => {
     );
 
     expect(config.poweredByHeader).toBe(false);
-    expect(poweredBy).toEqual([{ source: '/:path*', value: 'bulwarkmail.org' }]);
+    expect(poweredBy).toEqual([]);
   });
 
   it('matches the root, pages, API routes and static files', () => {

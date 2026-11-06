@@ -1,4 +1,4 @@
-# The shared store every Bulwark replica uses. One Valkey with persistence
+# The shared store every Relay replica uses. One Valkey with persistence
 # (AOF) and noeviction: an evicting policy would silently drop settings and
 # admin config under memory pressure. A managed Redis or Valkey works as well;
 # then delete this file from kustomization.yaml and point REDIS_URL at it.
@@ -57,7 +57,7 @@ spec:
             - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: bulwark-secrets
+                  name: relay-secrets
                   key: VALKEY_PASSWORD
           ports:
             - name: redis

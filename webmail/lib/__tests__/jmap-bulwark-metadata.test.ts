@@ -3,7 +3,7 @@ import { JMAPClient } from '../jmap/client';
 import { MetadataRefusedError, MetadataTooLargeError, MetadataUnsupportedError, bulwarkEntries, isValidMetadataKey } from '../jmap/bulwark-metadata';
 import recorded from './fixtures/stalwart-1.0.0-template-metadata.json';
 
-// Bulwark keeps shared tags and templates in the Inbox metadata of an
+// Relay Mail keeps shared tags and templates in the Inbox metadata of an
 // account, one namespace per item (each namespace holds at most 8 KB on
 // Stalwart v1.0.0). Servers without metadata, and the pre-release 1.0 build
 // that drops the connection on these calls, count as "not supported".

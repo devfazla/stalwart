@@ -200,7 +200,7 @@ export async function doUserFindPeople(plugin: InstalledPlugin, query: unknown):
 /**
  * Largest value a plugin keeps in one account: half of the 8 KB Stalwart
  * takes per entry. Every entry counts against the mailbox's 64 KB, which
- * Bulwark's own shared tags and team templates need too.
+ * Relay Mail's own shared tags and team templates need too.
  */
 export const MAX_PLUGIN_DATA_BYTES = 4096;
 /** Reads and changes one plugin may make a minute. */

@@ -74,7 +74,7 @@ describe('enterprise sections: defaults and sanitising', () => {
     }
   });
 
-  it('refuses the header Bulwark keeps the label of a draft in', () => {
+  it('refuses the header Relay Mail keeps the label of a draft in', () => {
     expect(sanitizeOrganisationPolicy({ labels: { extraHeader: 'X-Bulwark-Label' } }).labels.extraHeader).toBe('');
     expect(isLabelExtraHeaderName('X-Bulwark-Label')).toBe(false);
     expect(isLabelExtraHeaderName('X-Classification')).toBe(true);

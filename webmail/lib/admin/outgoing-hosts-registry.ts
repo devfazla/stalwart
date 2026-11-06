@@ -1,5 +1,5 @@
 /**
- * Every outside host Bulwark itself knows about, what talks to it, and what
+ * Every outside host Relay Mail itself knows about, what talks to it, and what
  * turns it off (#903). The admin view (/api/admin/outgoing-hosts) and the
  * tests read this; the browser only needs the host names and the switches in
  * lib/outgoing-hosts.ts, so none of this prose ends up in client chunks.
@@ -29,7 +29,7 @@ export interface OutgoingHost {
   off: string;
   /** What the mode does instead. */
   inMode: string;
-  /** Also present in Bulwark Lite. */
+  /** Also present in Relay Mail Lite. */
   lite: boolean;
 }
 
@@ -37,40 +37,44 @@ export const OUTGOING_HOSTS: readonly OutgoingHost[] = [
   {
     id: 'telemetry',
     host: 'telemetry.bulwarkmail.org',
-    files: ['lib/telemetry/types.ts'],
+    // No shipped file names a collector: the default collector is empty, so
+    // the heartbeat goes nowhere until an operator names one.
+    files: [],
     side: 'server',
-    usedBy: 'Anonymous daily heartbeat, sent only after an admin turned telemetry on; with instant error counts on, also the current day\'s error counts as they change. In the desktop app the user decides: the heartbeat with its usage info switch, and with crash report consent alone the error counts, with no heartbeat.',
-    off: 'Off by default. BULWARK_TELEMETRY=off, or System > Usage stats (switch it off or clear the collector URL). The desktop app has no admin page and takes no collector URL: its two switches in Settings, the TelemetryAllowed and CrashReportsAllowed policies, or BULWARK_TELEMETRY=off in its environment, which stops both.',
+    usedBy: 'Anonymous daily heartbeat, sent only after an admin turned telemetry on and named a collector; with instant error counts on, also the current day\'s error counts as they change. In the desktop app the user decides: the heartbeat with its usage info switch, and with crash report consent alone the error counts, with no heartbeat.',
+    off: 'Off by default: no collector is assumed. BULWARK_TELEMETRY_ENDPOINT names one, or an admin sets the collector under System > Usage stats; BULWARK_TELEMETRY=off stops the heartbeat either way. The desktop app has no admin page and takes no collector URL: its two switches in Settings, the TelemetryAllowed and CrashReportsAllowed policies, or BULWARK_TELEMETRY=off in its environment, which stops both.',
     inMode: 'Never sent, whatever the telemetry setting says.',
     lite: false,
   },
   {
     id: 'version-check',
     host: 'version.telemetry.bulwarkmail.org',
-    files: ['lib/version-check/types.ts'],
+    // No shipped file names an update server: the endpoint starts empty.
+    files: [],
     side: 'server',
-    usedBy: 'Hourly check for a newer Bulwark release, shown to admins.',
-    off: 'BULWARK_UPDATE_CHECK=off, or BULWARK_UPDATE_CHECK_URL= (empty).',
+    usedBy: 'Hourly check for a newer Relay Mail release, shown to admins.',
+    off: 'Off by default. Runs only with BULWARK_UPDATE_CHECK_URL set to an update server, or BULWARK_UPDATE_CHECK=on plus an endpoint; BULWARK_UPDATE_CHECK=off always stops it.',
     inMode: 'Not checked; System > Updates says why. Checks resume when the switch goes off.',
     lite: false,
   },
   {
     id: 'push-relay',
     host: 'notifications.relay.bulwarkmail.org',
-    files: ['lib/push-relays.ts', 'app/api/dev-jmap/[...path]/route.ts'],
+    // No shipped file names a relay: NEXT_PUBLIC_PUSH_RELAY_URL starts empty.
+    files: [],
     side: 'browser',
-    usedBy: 'Built-in Web Push relay that wakes the browser for new mail.',
-    off: 'Add your own relays under Users > Features and settings > Push relays and lock the choice.',
+    usedBy: 'Web Push relay that wakes the browser for new mail, offered only when NEXT_PUBLIC_PUSH_RELAY_URL names one.',
+    off: 'Off by default: no built-in relay without NEXT_PUBLIC_PUSH_RELAY_URL. Add relays under Users > Features and settings > Push relays and lock the choice.',
     inMode: 'Not offered. Push works only with a relay the admin configured; existing registrations move to it or are removed.',
     lite: false,
   },
   {
     id: 'extension-directory',
     host: 'extensions.bulwarkmail.org',
-    files: ['lib/admin/directory-keys.ts', 'lib/admin/marketplace-directory.ts', 'lib/admin/types.ts'],
+    files: ['lib/admin/directory-keys.ts'],
     side: 'server',
     usedBy: 'Marketplace browsing, installs and update checks in the admin panel.',
-    off: 'EXTENSION_DIRECTORY_URL pointing at a self-hosted directory.',
+    off: 'Off by default: EXTENSION_DIRECTORY_URL must name a directory, self-hosted or otherwise, before the admin panel reaches one.',
     inMode: 'Off, unless extensionDirectoryUrl points at another host.',
     lite: false,
   },
@@ -90,7 +94,7 @@ export const OUTGOING_HOSTS: readonly OutgoingHost[] = [
     files: ['app/api/favicon/route.ts'],
     side: 'server',
     usedBy: 'Sender icons next to messages, fetched by /api/favicon.',
-    off: 'Users can turn sender icons off in Settings > Message list.',
+    off: 'Off by default: with FAVICON_UPSTREAM_URL unset /api/favicon contacts nothing and avatars fall back to initials. Set it to public for the icon service below, or to your own icon service (a template with {domain} or a base URL). Users can also turn sender icons off in Settings > Message list.',
     inMode: 'Avatars show initials; /api/favicon answers 403 before any request.',
     lite: false,
   },
@@ -102,7 +106,7 @@ export const OUTGOING_HOSTS: readonly OutgoingHost[] = [
     files: [],
     side: 'server',
     usedBy: 'Brand logos (BIMI) for messages that pass DMARC, looked up by /api/bimi: TXT records at the sender\'s domain, then the logo, mark certificate and CRL they name.',
-    off: 'Users can turn sender icons off in Settings > Message list.',
+    off: 'Off by default: /api/bimi answers "no logo" without looking anything up until BIMI_ENABLED is set. Users can also turn sender icons off in Settings > Message list.',
     inMode: 'Avatars show no brand logos; /api/bimi answers 403 before any lookup.',
     lite: false,
   },
@@ -121,8 +125,8 @@ export const OUTGOING_HOSTS: readonly OutgoingHost[] = [
     host: 'api.mymemory.translated.net',
     files: ['app/api/translate/route.ts'],
     side: 'server',
-    usedBy: 'Default provider of /api/translate, which the Translate plugin calls.',
-    off: 'Set LIBRETRANSLATE_URL to your own LibreTranslate and pick it in the plugin.',
+    usedBy: 'Fallback provider of /api/translate, which the Translate plugin calls.',
+    off: 'Off by default: /api/translate uses MYMEMORY_ENABLED to reach it, so the plugin answers 503 until an operator opts in. Set LIBRETRANSLATE_URL to your own LibreTranslate instead and it is the provider used.',
     inMode: 'Refused with 403; LibreTranslate at LIBRETRANSLATE_URL still works.',
     lite: false,
   },
@@ -161,7 +165,7 @@ export const OUTGOING_HOSTS: readonly OutgoingHost[] = [
 ];
 
 /**
- * Hosts in the source that Bulwark never connects to on its own: docs links,
+ * Hosts in the source that Relay Mail never connects to on its own: docs links,
  * XML namespaces, credits, examples in comments and sample text. Each is
  * allowed only in the files named, so the same host turning up somewhere new
  * has to be looked at again.

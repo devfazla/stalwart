@@ -23,23 +23,29 @@ export type Channel = 'stable' | 'beta';
 
 export async function getDirectoryUrl(): Promise<string> {
   await configManager.ensureLoaded();
-  const url = configManager.get<string>('extensionDirectoryUrl') || 'https://extensions.bulwarkmail.org';
+  // No directory is assumed: an empty setting means the marketplace asks
+  // nothing outside until an operator sets EXTENSION_DIRECTORY_URL.
+  const url = configManager.get<string>('extensionDirectoryUrl') || '';
+  if (!url) throw new DirectoryError(NO_DIRECTORY_MESSAGE, 400);
   // Defense in depth: the routes ask directoryOff() first and answer 403.
   if (isBuiltInHost(url) && await isNoThirdPartyTrafficOn()) throw new DirectoryError(DIRECTORY_OFF_MESSAGE, 403);
   return url;
 }
 
 export const DIRECTORY_OFF_MESSAGE =
-  'The official extension directory is off: this server does not contact outside services (NO_THIRD_PARTY_TRAFFIC). Point EXTENSION_DIRECTORY_URL at a self-hosted directory to use the marketplace.';
+  'The extension directory is off: this server does not contact outside services (NO_THIRD_PARTY_TRAFFIC). Point EXTENSION_DIRECTORY_URL at a self-hosted directory to use the marketplace.';
+
+export const NO_DIRECTORY_MESSAGE =
+  'No extension directory is configured. Set EXTENSION_DIRECTORY_URL (or the directory field below) to a directory you run or trust; the marketplace contacts nothing until then.';
 
 /**
  * Whether the marketplace must not ask its directory: the no-third-party
- * mode is on and the directory is the official one (#903). A self-hosted
+ * mode is on and the directory is the built-in one (#903). A self-hosted
  * directory is the deployment's own and stays reachable.
  */
 export async function directoryOff(): Promise<boolean> {
   await configManager.ensureLoaded();
-  const url = configManager.get<string>('extensionDirectoryUrl') || 'https://extensions.bulwarkmail.org';
+  const url = configManager.get<string>('extensionDirectoryUrl') || '';
   return isBuiltInHost(url) && await isNoThirdPartyTrafficOn();
 }
 
@@ -56,7 +62,7 @@ export function v2Url(directoryUrl: string, path: string, query: Record<string, 
   return url;
 }
 
-/** The query every catalogue request carries so the directory filters for this Bulwark. */
+/** The query every catalogue request carries so the directory filters for this app version. */
 export function compatQuery(): Record<string, string | undefined> {
   return { appVersion: APP_VERSION || undefined, channel: getDirectoryChannel() };
 }
@@ -234,7 +240,7 @@ export interface MarketplaceListing extends InstalledState {
   totalDownloads: number;
   rating: { average: number; count: number };
   deprecated: DirectorySummary['deprecated'];
-  /** The version the directory offers this Bulwark, or null if none fits. */
+  /** The version the directory offers this Relay Mail, or null if none fits. */
   latest: DirectoryVersion | null;
   /** Kept for the card: the offered version's number and requirement. */
   latestVersion: string | null;

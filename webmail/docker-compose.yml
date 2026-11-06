@@ -1,33 +1,60 @@
+# Relay Mail on its own — use this to run just the webmail client.
+#
+# For the full deployment (server and client behind one Coolify resource) use
+# the repository root's docker-compose.yml; that file is the source of truth and
+# this one only has to stay useful for a standalone install.
+#
+# Nothing is pulled from a registry: build it from this directory with
+#   GIT_COMMIT=$(git rev-parse --short HEAD) docker compose up -d --build
+#
+# The client needs a JMAP server. Point JMAP_SERVER_URL at one in an env file,
+# or leave it unset and let people type their server on the login page
+# (ALLOW_CUSTOM_JMAP_ENDPOINT=true).
+
 services:
   webmail:
-    image: ghcr.io/bulwarkmail/webmail:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+    image: relay-webmail:local
     ports:
       - "3000:3000"
     environment:
       - HOSTNAME=0.0.0.0 # Use "::" for IPv6
       - PORT=3000
-    env_file:
-      - .env.local
+      # Keep every built-in third-party host (telemetry collector, update check,
+      # push relay, extension directory, icon and translation proxies) unreachable.
+      - NO_THIRD_PARTY_TRAFFIC=true
+      - BULWARK_TELEMETRY=off
+      - BULWARK_UPDATE_CHECK=off
+    # The remaining settings (JMAP_SERVER_URL, SESSION_SECRET, ADMIN_PASSWORD,
+    # OAuth, branding) go in .env.local. It is gitignored, so a missing file must
+    # not fail the deploy — the `required: false` form needs Compose 2.24+.
+    # env_file:
+    #   - path: .env.local
+    #     required: false
     volumes:
-      # These six volumes together are everything Bulwark keeps under /app/data.
-      # A fresh install can use one `bulwark-data:/app/data` volume instead.
+      # These six volumes together are everything Relay keeps under /app/data.
+      # A fresh install can use one `relay-data:/app/data` volume instead.
       #
       # Encrypted user settings (SETTINGS_DATA_DIR).
-      - bulwark-settings:/app/data/settings
+      - relay-settings:/app/data/settings
       # Admin configuration: config.json, policy.json, admin.json (passwordHash),
       # plugins, themes, branding uploads (ADMIN_CONFIG_DIR). Can be mounted
       # read-only after running the setup wizard - append `:ro` to lock it.
-      - bulwark-admin:/app/data/admin
+      - relay-admin:/app/data/admin
       # Admin runtime state: admin-state.json (login timestamps), audit.log,
       # setup token (ADMIN_STATE_DIR). Always read-write.
-      - bulwark-admin-state:/app/data/admin-state
+      - relay-admin-state:/app/data/admin-state
       # Anonymous telemetry: instance id, consent state, login HMACs (TELEMETRY_DATA_DIR).
       # Persisting this preserves the admin's consent choice and stable instance id across upgrades.
-      - bulwark-telemetry:/app/data/telemetry
+      - relay-telemetry:/app/data/telemetry
       # Users' plugin credentials, encrypted (PLUGIN_SECRETS_DIR).
-      - bulwark-plugin-secrets:/app/data/plugin-secrets
+      - relay-plugin-secrets:/app/data/plugin-secrets
       # Result of the last update check (VERSION_CHECK_DATA_DIR).
-      - bulwark-version-check:/app/data/version-check
+      - relay-version-check:/app/data/version-check
     healthcheck:
       test:
         [
@@ -45,9 +72,9 @@ services:
     restart: unless-stopped
 
 volumes:
-  bulwark-settings:
-  bulwark-admin:
-  bulwark-admin-state:
-  bulwark-telemetry:
-  bulwark-plugin-secrets:
-  bulwark-version-check:
+  relay-settings:
+  relay-admin:
+  relay-admin-state:
+  relay-telemetry:
+  relay-plugin-secrets:
+  relay-version-check:

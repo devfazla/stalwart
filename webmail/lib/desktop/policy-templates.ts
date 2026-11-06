@@ -138,11 +138,11 @@ export function generateAdmx(): string {
 }
 
 const INTRO: PolicyText = {
-  en: 'Settings for the Bulwark desktop app.',
-  de: 'Einstellungen für die Bulwark-Desktop-App.',
+  en: 'Settings for the Relay desktop app.',
+  de: 'Einstellungen für die Relay-Desktop-App.',
 };
-const SUPPORTED_TEXT: PolicyText = { en: 'All versions of Bulwark Desktop', de: 'Alle Versionen von Bulwark Desktop' };
-const RECOMMENDED_TEXT: PolicyText = { en: 'Bulwark Desktop: defaults users can change', de: 'Bulwark Desktop: Standardwerte, die Benutzer ändern können' };
+const SUPPORTED_TEXT: PolicyText = { en: 'All versions of Relay Desktop', de: 'Alle Versionen von Relay Desktop' };
+const RECOMMENDED_TEXT: PolicyText = { en: 'Relay Desktop: defaults users can change', de: 'Relay Desktop: Standardwerte, die Benutzer ändern können' };
 
 function presentationFor(key: PolicyKey, id: string, language: Language): string | null {
   const definition: PolicyDefinition = POLICY_SCHEMA[key];
@@ -163,8 +163,8 @@ function presentationFor(key: PolicyKey, id: string, language: Language): string
 
 export function generateAdml(language: Language): string {
   const strings: [string, string][] = [
-    ['Category_Bulwark', 'Bulwark'],
-    ['Category_Desktop', 'Bulwark Desktop'],
+    ['Category_Bulwark', 'Relay'],
+    ['Category_Desktop', 'Relay Desktop'],
     ['Category_Recommended', RECOMMENDED_TEXT[language]],
     [SUPPORTED, SUPPORTED_TEXT[language]],
     ...CATEGORY_IDS.map((category): [string, string] => [`Category_${category}`, POLICY_CATEGORIES[category][language]]),
@@ -185,7 +185,7 @@ export function generateAdml(language: Language): string {
     '<?xml version="1.0" encoding="utf-8"?>',
     '<!-- Generated from lib/desktop/policy-schema.ts by scripts/generate-desktop-policies.mjs. Do not edit. -->',
     `<policyDefinitionResources xmlns="${NAMESPACE}" revision="1.0" schemaVersion="1.0">`,
-    '  <displayName>Bulwark Desktop</displayName>',
+    '  <displayName>Relay Desktop</displayName>',
     `  <description>${xml(INTRO[language])}</description>`,
     '  <resources>',
     '    <stringTable>',
@@ -248,7 +248,7 @@ export function generateMobileconfig(): string {
     PayloadIdentifier: `${POLICY_BUNDLE_ID}.policy.settings`,
     PayloadUUID: stableUuid('settings'),
     PayloadEnabled: true,
-    PayloadDisplayName: 'Bulwark settings',
+    PayloadDisplayName: 'Relay settings',
     InstanceUrl,
     ...forced,
     // Not forced: a default the user can change.
@@ -260,7 +260,7 @@ export function generateMobileconfig(): string {
     PayloadVersion: 1,
     PayloadIdentifier: `${POLICY_BUNDLE_ID}.policy`,
     PayloadUUID: stableUuid('profile'),
-    PayloadDisplayName: 'Bulwark Desktop',
+    PayloadDisplayName: 'Relay Desktop',
     PayloadDescription: 'A sample profile. Remove what you do not want to set, and change the rest.',
     PayloadScope: 'System',
   };

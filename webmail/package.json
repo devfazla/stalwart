@@ -1,16 +1,16 @@
 {
-  "name": "bulwark-webmail",
+  "name": "relay-webmail",
   "version": "1.20.0",
-  "description": "Bulwark Webmail: self-hosted webmail for mail, calendar, contacts and files, built on JMAP",
-  "author": "Bulwark Mail <dev@bulwarkmail.org>",
+  "description": "Relay Mail: self-hosted webmail for mail, calendar, contacts and files, built on JMAP",
+  "author": "devfazla <frchowdhury480@gmail.com>",
   "license": "AGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bulwarkmail/webmail.git"
+    "url": "git+https://github.com/devfazla/stalwart.git"
   },
-  "homepage": "https://github.com/bulwarkmail/webmail",
+  "homepage": "https://github.com/devfazla/stalwart/tree/main/webmail",
   "bugs": {
-    "url": "https://github.com/bulwarkmail/webmail/issues"
+    "url": "https://github.com/devfazla/stalwart/issues"
   },
   "keywords": [
     "jmap",

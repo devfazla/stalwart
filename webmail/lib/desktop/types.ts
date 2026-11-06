@@ -672,7 +672,7 @@ export interface DesktopOsSettings {
   /** HH:MM, local time. */
   quietHoursStart: string;
   quietHoursEnd: string;
-  /** "Show Bulwark", an Electron accelerator. Null: off. */
+  /** "Show Relay Mail", an Electron accelerator. Null: off. */
   showShortcut: string | null;
   /** Quick compose, an Electron accelerator. Null: off. Unset: nobody chose, so the policy's or the built-in one. */
   quickComposeShortcut?: string | null;
@@ -1148,7 +1148,7 @@ export interface FilesDriveStatus {
   quota: { used: number; total: number | null; label: string } | null;
   /** Storage nearly full or full, in words. */
   notice: string | null;
-  /** The tray menu's line: "Bulwark Files: Up to date". Older shells ignore it. */
+  /** The tray menu's line: "Relay Mail Files: Up to date". Older shells ignore it. */
   tray?: string;
 }
 
@@ -1209,7 +1209,7 @@ export interface FilesDriveControls {
   /**
    * `user`: turned off. `signed-out`: the account signed out, and comes back at the next
    * sign-in, pins included. Both unregister the sync root and delete its folder, after
-   * copying what wasn't uploaded to `Documents\Bulwark – not uploaded\<date>` (`rescued`;
+   * copying what wasn't uploaded to `Documents\Relay Mail – not uploaded\<date>` (`rescued`;
    * older shells answer nothing and copy nothing). `suspended`: a sign-out nobody chose; only
    * disconnects, the folder stays. `wipe` and `refused` delete everything, nothing is copied.
    */

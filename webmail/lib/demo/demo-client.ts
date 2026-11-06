@@ -63,7 +63,7 @@ export class DemoJMAPClient implements IJMAPClient {
   private readonly principals: Principal[];
   /** Mail deleted for good that the server still keeps (Recover deleted items). */
   private archive: DemoArchivedItem[];
-  /** Bulwark's shared Inbox metadata by account and key; only accounts listed here have any. */
+  /** Relay Mail's shared Inbox metadata by account and key; only accounts listed here have any. */
   private metadata: Record<string, Record<string, unknown>>;
   /** The same for each account's private metadata. */
   private ownMetadata: Record<string, Record<string, unknown>> = {};
@@ -332,7 +332,7 @@ export class DemoJMAPClient implements IJMAPClient {
       .sort((a, b) => a.utcStart.localeCompare(b.utcStart));
   }
 
-  // ── Bulwark data in Inbox metadata (urn:ietf:params:jmap:metadata) ──
+  // ── Relay Mail data in Inbox metadata (urn:ietf:params:jmap:metadata) ──
   // Only the Support group keeps any (fixtures/shared-metadata.ts): its
   // shared tags and the team inbox plugin's names. Keys are without the
   // `org.bulwarkmail.` namespace, as JMAPClient hands them out.

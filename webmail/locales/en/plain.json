@@ -408,7 +408,7 @@
     },
     "security": {
       "description": "Change your password and protect your account",
-      "not_available": "You can't change the security settings for this mail server here. Your server may not allow it. The <a href=\"https://bulwarkmail.org/docs/guides/account-security\" class=\"underline hover:opacity-80\" target=\"_blank\">documentation</a> explains more.",
+      "not_available": "You can't change the security settings for this mail server here. Your server may not allow it. The documentation explains more.",
       "password": {
         "error_title": "Your password was not changed",
         "error_mismatch": "The two new passwords are not the same. Type them again.",
@@ -461,7 +461,7 @@
         "remove_error": "The public key could not be deleted. Try again."
       },
       "link_device": {
-        "description": "Sign in to the Bulwark Mail app on your phone without typing your password. Your phone gets its own sign-in. If you sign out here, your phone stays signed in.",
+        "description": "Sign in to the Relay Mail app on your phone without typing your password. Your phone gets its own sign-in. If you sign out here, your phone stays signed in.",
         "error": "The code could not be created. Try again.",
         "password_prompt": "Type your password to show it's you. Your password is not sent to the phone.",
         "error_not_signed_in": "You were signed out. Sign in again, then link your phone.",

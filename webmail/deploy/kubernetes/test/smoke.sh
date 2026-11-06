@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Smoke test for a running deployment of deploy/kubernetes:
-#   - Valkey and every Bulwark replica become ready, on the shared store;
+#   - Valkey and every Relay replica become ready, on the shared store;
 #   - an admin session made on one replica is valid on every other one;
 #   - a config change saved on one replica reaches the others within 5 s;
 #   - deleting a pod and a rolling restart don't fail requests through the
@@ -13,7 +13,7 @@
 # on a command line.
 set -euo pipefail
 
-NS="${1:-bulwark}"
+NS="${1:-relay}"
 : "${ADMIN_PASSWORD:?set ADMIN_PASSWORD to the admin password of the deployment}"
 k() { kubectl -n "$NS" "$@"; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
@@ -21,7 +21,7 @@ step() { echo "== $*"; }
 
 step "rollout"
 k rollout status statefulset/valkey --timeout=300s
-k rollout status deployment/bulwark --timeout=600s
+k rollout status deployment/relay --timeout=600s
 
 step "curl pod"
 if ! k get pod smoke-curl >/dev/null 2>&1; then
@@ -32,7 +32,7 @@ k wait pod/smoke-curl --for=condition=Ready --timeout=180s >/dev/null
 c() { k exec -i smoke-curl -- curl -sS --max-time 10 "$@"; }
 status() { k exec smoke-curl -- curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$@" || echo 000; }
 
-pod_ips() { k get pods -l app.kubernetes.io/name=bulwark --field-selector=status.phase=Running -o jsonpath='{.items[*].status.podIP}'; }
+pod_ips() { k get pods -l app.kubernetes.io/name=relay --field-selector=status.phase=Running -o jsonpath='{.items[*].status.podIP}'; }
 read -r -a IPS <<<"$(pod_ips)"
 [ "${#IPS[@]}" -ge 2 ] || fail "need at least 2 replicas, found ${#IPS[@]}"
 echo "replicas: ${IPS[*]}"
@@ -88,7 +88,7 @@ ca -o /dev/null -X DELETE -H 'Content-Type: application/json' --data '{"key":"ap
   "http://${IPS[0]}:3000/api/admin/config" </dev/null
 fi
 
-SVC="http://bulwark.$NS.svc/api/ready"
+SVC="http://relay.$NS.svc/api/ready"
 probe_while() {
   # Ask the Service once a second while "$@" runs; count failed answers.
   local failures=0 total=0
@@ -105,16 +105,16 @@ probe_while() {
 }
 
 step "deleting a pod keeps the Service answering"
-victim="$(k get pods -l app.kubernetes.io/name=bulwark -o jsonpath='{.items[0].metadata.name}')"
+victim="$(k get pods -l app.kubernetes.io/name=relay -o jsonpath='{.items[0].metadata.name}')"
 probe_while k delete pod "$victim" --wait=true
-k rollout status deployment/bulwark --timeout=300s
+k rollout status deployment/relay --timeout=300s
 
 step "a rolling restart keeps the Service answering"
-k rollout restart deployment/bulwark
-probe_while k rollout status deployment/bulwark --timeout=600s
+k rollout restart deployment/relay
+probe_while k rollout status deployment/relay --timeout=600s
 
 step "the admin session survives the new pods"
-ca "http://bulwark.$NS.svc/api/admin/auth" </dev/null | grep -q '"authenticated":true' || fail "admin session lost"
+ca "http://relay.$NS.svc/api/admin/auth" </dev/null | grep -q '"authenticated":true' || fail "admin session lost"
 
 k delete pod smoke-curl --wait=false >/dev/null
 echo "OK"

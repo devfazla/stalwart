@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BulwarkDesktopBridge } from '@/lib/desktop/types';
 import en from '@/locales/en/common.json';
 
-vi.mock('@/hooks/use-config', () => ({ useConfig: () => ({ appName: 'Bulwark' }) }));
+vi.mock('@/hooks/use-config', () => ({ useConfig: () => ({ appName: 'Relay Mail' }) }));
 
 const { ProtocolHandlerSettings } = await import('../protocol-handler-settings');
 

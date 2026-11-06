@@ -5,28 +5,28 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: bulwark
+namespace: relay
 
 resources:
   - namespace.yaml
   - valkey.yaml
-  - bulwark.yaml
+  - relay.yaml
 
 configMapGenerator:
-  - name: bulwark-env
+  - name: relay-env
     envs:
-      - bulwark.env
+      - relay.env
 
 secretGenerator:
-  - name: bulwark-secrets
+  - name: relay-secrets
     envs:
       - secrets.env
 
 images:
-  - name: ghcr.io/bulwarkmail/webmail
+  - name: ghcr.io/devfazla/relay-webmail
     newTag: latest
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: bulwark
+      app.kubernetes.io/part-of: relay
     includeSelectors: false

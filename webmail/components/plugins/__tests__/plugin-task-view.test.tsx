@@ -78,7 +78,7 @@ describe('calendar-task-view', () => {
     expect(opts.extraProps).toEqual({ filter: 'pending' });
   });
 
-  it("gives Bulwark's list back when the plugin's shouldShow says no", async () => {
+  it("gives Relay Mail's list back when the plugin's shouldShow says no", async () => {
     offer('picky', { shouldShow: false });
     const { findByTestId, container } = render(<TaskArea />);
     expect(await findByTestId('bulwark-task-list')).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('calendar-task-view', () => {
     expect(container.querySelector('[data-plugin-task-view]')).toHaveClass('hidden');
   });
 
-  it("gives Bulwark's list back when the plugin's frame fails to start", async () => {
+  it("gives Relay Mail's list back when the plugin's frame fails to start", async () => {
     createSlotInstance.mockImplementationOnce(() => slotInstance(Promise.reject(new Error('boom'))));
     offer('broken');
     const { findByTestId, container } = render(<TaskArea />);

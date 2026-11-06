@@ -274,8 +274,8 @@ function stripRuleForMetadata(r: FilterRule): Omit<FilterRule, 'origin' | 'origi
 
 export interface GenerateOptions {
   /**
-   * Require extensions used by external (non-Bulwark) rules that we must
-   * preserve in the top-level `require` directive. Duplicates with Bulwark's
+   * Require extensions used by external (non-Relay Mail) rules that we must
+   * preserve in the top-level `require` directive. Duplicates with Relay Mail's
    * own requires are deduplicated.
    */
   externalRequires?: string[];
@@ -391,7 +391,7 @@ export function generateScript(
   }
 
   if (options.includeVacation) {
-    // The "# Vacation auto-reply" comment marks the block as Bulwark's, so
+    // The "# Vacation auto-reply" comment marks the block as Relay Mail's, so
     // the parser does not re-import it as an external rule.
     lines.push('');
     lines.push('# Vacation auto-reply');
@@ -514,7 +514,7 @@ export function generateScript(
     .filter((block) => block.length > 0);
   if (externalBlocks.length > 0) {
     lines.push('');
-    lines.push('# --- External rules (managed outside Bulwark) ---');
+    lines.push('# --- External rules (managed outside Relay Mail) ---');
     lines.push(externalBlocks.join('\n\n'));
   }
 

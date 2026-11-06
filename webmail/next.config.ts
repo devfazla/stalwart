@@ -60,13 +60,13 @@ if (basePath && !basePath.startsWith("/")) {
   );
 }
 
-// Bulwark Lite (see lib/lite.ts and scripts/lite/): the same tree exported as
+// Relay Mail Lite (see lib/lite.ts and scripts/lite/): the same tree exported as
 // static files. `npm run build:lite` sets the flag; a plain `next build` never
 // sees it, so the standalone/Docker build is unaffected.
 const isLite = process.env.NEXT_PUBLIC_BULWARK_LITE === "1";
 if (isLite && (process.env.NEXT_PUBLIC_LOCALE_PREFIX ?? "never") !== "always") {
   // Without the proxy nothing rewrites /mail to /<locale>/mail.
-  throw new Error("Bulwark Lite requires NEXT_PUBLIC_LOCALE_PREFIX=always (use `npm run build:lite`)");
+  throw new Error("Relay Mail Lite requires NEXT_PUBLIC_LOCALE_PREFIX=always (use `npm run build:lite`)");
 }
 
 // Browser source maps, for resolving the stack traces in error reports.
@@ -78,8 +78,8 @@ const sourceMaps = process.env.BULWARK_SOURCE_MAPS === "1";
 const nextConfig: NextConfig = {
   output: isLite ? "export" : "standalone",
   productionBrowserSourceMaps: sourceMaps,
-  // No `X-Powered-By: Next.js`; headers() below sends
-  // `X-Powered-By: bulwarkmail.org` instead, without a version.
+  // No `X-Powered-By` header at all: neither Next's default nor a replacement
+  // naming the product. headers() below only sends the build id.
   poweredByHeader: false,
   generateBuildId: async () => buildId,
   // Keep proxy rewrites on the origin the server listens on. Next renames a
@@ -127,14 +127,13 @@ const nextConfig: NextConfig = {
         async headers() {
           return [
             {
-              // Lets people see a site runs Bulwark. No version, so it tells
-              // a scanner nothing about which fixes are missing.
+              // Which build answered (#523): the service worker files a page
+              // or a chunk under that build, not under its own. The header is
+              // the only thing the app reads off these responses, so no
+              // "powered by" advertising is emitted.
               source: "/:path*",
               headers: [
-                { key: "X-Powered-By", value: "bulwarkmail.org" },
-                // Which build answered (#523): the service worker files a page
-                // or a chunk under that build, not under its own.
-                { key: "X-Bulwark-Build", value: buildId },
+                { key: "X-Relay-Build", value: buildId },
               ],
             },
             {

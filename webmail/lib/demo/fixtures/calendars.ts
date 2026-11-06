@@ -239,7 +239,7 @@ export function createGoNoGoInvitationIcs(): string {
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Meridian Labs//Bulwark Demo//EN',
+    'PRODID:-//Relay//Relay Mail//EN',
     'METHOD:REQUEST',
     'BEGIN:VEVENT',
     `UID:${event.uid}`,

@@ -14,7 +14,7 @@ export function clientFor(localAccountId: string): TemplateClient | null {
   return client as unknown as TemplateClient;
 }
 
-/** Whether Bulwark may use the metadata of this account of the client. */
+/** Whether Relay Mail may use the metadata of this account of the client. */
 export function hasMetadata(
   client: TemplateClient | null | undefined,
   accountId: string,

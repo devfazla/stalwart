@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bulwark
+  name: relay
 spec:
   template:
     spec:
       containers:
-        - name: bulwark
+        - name: relay
           env:
             - name: ADMIN_CONFIG_READONLY
               value: "true"
@@ -17,4 +17,4 @@ spec:
       volumes:
         - name: admin-config
           configMap:
-            name: bulwark-admin-config
+            name: relay-admin-config

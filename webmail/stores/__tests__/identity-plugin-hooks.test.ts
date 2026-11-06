@@ -132,14 +132,14 @@ describe('identity plugin hooks', () => {
   it('hands the signature to plugins and uses what they return', async () => {
     identityHooks.onSignatureRender.register('test', (sig: { html: string; text: string }, ctx: { identityId: string }) => {
       expect(ctx).toEqual({ identityId: 'id-1' });
-      return { html: `${sig.html}<p>Sent from Bulwark</p>`, text: `${sig.text}\nSent from Bulwark` };
+      return { html: `${sig.html}<p>Sent from Relay Mail</p>`, text: `${sig.text}\nSent from Relay Mail` };
     });
     const ident = identity();
     const { result } = renderHook(() => usePluginSignature(ident));
 
     await waitFor(() => expect(result.current.revision).toBe(1));
-    expect(result.current.identity?.htmlSignature).toBe('<b>Ann</b><p>Sent from Bulwark</p>');
-    expect(result.current.identity?.textSignature).toBe('Ann\nSent from Bulwark');
+    expect(result.current.identity?.htmlSignature).toBe('<b>Ann</b><p>Sent from Relay Mail</p>');
+    expect(result.current.identity?.textSignature).toBe('Ann\nSent from Relay Mail');
     expect(result.current.identity?.id).toBe('id-1');
   });
 

@@ -1,9 +1,9 @@
-# Bulwark Lite as a container: the static export behind an unprivileged nginx,
+# Relay Mail Lite as a container: the static export behind an unprivileged nginx,
 # no Node.js at runtime. Mount your own config.json (and policy.json) over the
 # ones in /usr/share/nginx/html to configure it - see README.md, "Static Lite
 # build".
 #
-#   docker build -f Dockerfile.lite -t bulwark-lite .
+#   docker build -f Dockerfile.lite -t relay-lite .
 
 # The export is plain files, so it is built once on the build host's
 # architecture, whatever the target platform is.
@@ -34,12 +34,12 @@ RUN LITE_TARGET=static NEXT_PUBLIC_BASE_PATH= npm run build:lite && \
 
 FROM nginxinc/nginx-unprivileged:1.30-alpine-slim
 
-LABEL org.opencontainers.image.title="Bulwark Webmail Lite"
-LABEL org.opencontainers.image.description="Bulwark Webmail as static files behind nginx; talks to the JMAP server straight from the browser"
-LABEL org.opencontainers.image.source="https://github.com/bulwarkmail/webmail"
-LABEL org.opencontainers.image.url="https://github.com/bulwarkmail/webmail"
+LABEL org.opencontainers.image.title="Relay Mail Lite"
+LABEL org.opencontainers.image.description="Relay Mail as static files behind nginx; talks to the JMAP server straight from the browser"
+LABEL org.opencontainers.image.source="https://github.com/devfazla/stalwart"
+LABEL org.opencontainers.image.url="https://github.com/devfazla/stalwart"
 LABEL org.opencontainers.image.licenses="AGPL-3.0-only"
-LABEL org.opencontainers.image.vendor="rbm.systems"
+LABEL org.opencontainers.image.vendor="devfazla"
 
 # connect-src of the Content-Security-Policy. Set it to your JMAP server's
 # origin (e.g. https://mail.example.com) once config.json pins the server.

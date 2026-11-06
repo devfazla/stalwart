@@ -14,7 +14,7 @@ resources:
   - ../../base
 
 configMapGenerator:
-  - name: bulwark-admin-config
+  - name: relay-admin-config
     files:
       - config.json
       - policy.json

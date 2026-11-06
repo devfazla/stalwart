@@ -1,6 +1,6 @@
 # Integration tests — webmail ⇆ Stalwart
 
-End-to-end tests that run the **Bulwark webmail against a real Stalwart mail
+End-to-end tests that run the **Relay Mail webmail against a real Stalwart mail
 server** in Docker and drive it with Playwright. The focus is the mail/folder
 **synchronisation** behaviour that multi-account webmail clients get wrong:
 unread/total counters, folder-list sync, and the account-scoped Unified Mailbox.

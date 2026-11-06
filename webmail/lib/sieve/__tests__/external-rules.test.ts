@@ -8,7 +8,7 @@ import type { FilterRule } from '@/lib/jmap/sieve-types';
 function makeBulwarkRule(overrides: Partial<FilterRule> = {}): FilterRule {
   return {
     id: 'bw-1',
-    name: 'Bulwark Rule',
+    name: 'Relay Mail Rule',
     enabled: true,
     matchType: 'all',
     conditions: [{ field: 'from', comparator: 'contains', value: 'test@example.com' }],
@@ -84,9 +84,9 @@ describe('external rule preservation (issue #201)', () => {
     });
   });
 
-  describe('parser - mixed Bulwark + external', () => {
-    it('returns Bulwark rules from metadata and external rules from the rest', () => {
-      const bulwark = [makeBulwarkRule({ name: 'Bulwark A' })];
+  describe('parser - mixed Relay Mail + external', () => {
+    it('returns Relay Mail rules from metadata and external rules from the rest', () => {
+      const bulwark = [makeBulwarkRule({ name: 'Relay Mail A' })];
       const bulwarkScript = generateScript(bulwark);
       const mixedScript = `${bulwarkScript}\n# External appended by Nextcloud\nif header :contains "List-Id" "devs" {\n    fileinto "Dev";\n}\n`;
 
@@ -97,13 +97,13 @@ describe('external rule preservation (issue #201)', () => {
       const bulwarkParsed = result.rules.filter(r => !r.origin || r.origin === 'bulwark');
       const externalParsed = result.rules.filter(r => r.origin === 'external');
       expect(bulwarkParsed).toHaveLength(1);
-      expect(bulwarkParsed[0].name).toBe('Bulwark A');
+      expect(bulwarkParsed[0].name).toBe('Relay Mail A');
       expect(externalParsed).toHaveLength(1);
       expect(externalParsed[0].originLabel).toBe('Nextcloud');
     });
 
-    it('does not return Bulwark-emitted if-blocks as external duplicates', () => {
-      const bulwark = [makeBulwarkRule({ name: 'My Bulwark Rule' })];
+    it('does not return Relay Mail-emitted if-blocks as external duplicates', () => {
+      const bulwark = [makeBulwarkRule({ name: 'My Relay Mail Rule' })];
       const script = generateScript(bulwark);
       const result = parseScript(script);
 
@@ -112,7 +112,7 @@ describe('external rule preservation (issue #201)', () => {
       expect(result.rules[0].origin).toBeUndefined();
     });
 
-    it('does not duplicate a Bulwark rule whose values contain literal braces', () => {
+    it('does not duplicate a Relay Mail rule whose values contain literal braces', () => {
       // Regression for an issue where a value like "Report Domain: {x}" caused
       // parseIfBlockToRule's naive indexOf('{') to point inside the value
       // instead of at the body, so the if-block fell back to an opaque rule
@@ -138,7 +138,7 @@ describe('external rule preservation (issue #201)', () => {
   });
 
   describe('generator - external splice', () => {
-    it('appends external rawBlocks verbatim after Bulwark-managed output', () => {
+    it('appends external rawBlocks verbatim after Relay Mail-managed output', () => {
       const externalRule: FilterRule = {
         id: 'ext-0',
         name: 'External',
@@ -154,10 +154,10 @@ describe('external rule preservation (issue #201)', () => {
       const rules: FilterRule[] = [makeBulwarkRule(), externalRule];
       const script = generateScript(rules);
 
-      expect(script).toContain('# Rule: Bulwark Rule');
+      expect(script).toContain('# Rule: Relay Mail Rule');
       expect(script).toContain('# Nextcloud Mail');
-      expect(script).toContain('# --- External rules (managed outside Bulwark) ---');
-      const bulwarkIdx = script.indexOf('# Rule: Bulwark Rule');
+      expect(script).toContain('# --- External rules (managed outside Relay Mail) ---');
+      const bulwarkIdx = script.indexOf('# Rule: Relay Mail Rule');
       const externalIdx = script.indexOf('# Nextcloud Mail');
       expect(bulwarkIdx).toBeLessThan(externalIdx);
     });
@@ -172,7 +172,7 @@ describe('external rule preservation (issue #201)', () => {
       expect(requireLine).toContain('"body"');
     });
 
-    it('strips origin/rawBlock/originLabel from Bulwark rules when writing metadata', () => {
+    it('strips origin/rawBlock/originLabel from Relay Mail rules when writing metadata', () => {
       const bulwarkWithJunk: FilterRule = {
         ...makeBulwarkRule(),
         origin: 'bulwark',
@@ -203,7 +203,7 @@ describe('external rule preservation (issue #201)', () => {
       const match = script.match(/@metadata:begin\n(.*)\n@metadata:end/);
       const metadata = JSON.parse(match![1]);
       expect(metadata.rules).toHaveLength(1);
-      expect(metadata.rules[0].name).toBe('Bulwark Rule');
+      expect(metadata.rules[0].name).toBe('Relay Mail Rule');
     });
   });
 
@@ -213,7 +213,7 @@ describe('external rule preservation (issue #201)', () => {
       'utf-8',
     );
 
-    it('identifies Bulwark, Roundcube, Nextcloud, External, and opaque rules', () => {
+    it('identifies Relay Mail, Roundcube, Nextcloud, External, and opaque rules', () => {
       const result = parseScript(fixture);
 
       expect(result.isOpaque).toBe(false);
@@ -248,7 +248,7 @@ describe('external rule preservation (issue #201)', () => {
       expect(regenerated).toContain(':comparator "i;ascii-numeric"');
       // Require tokens from the external content are preserved.
       expect(regenerated).toContain('"relational"');
-      // Bulwark rules are still present.
+      // Relay Mail rules are still present.
       expect(regenerated).toContain('# Rule: Archive newsletters');
     });
   });
@@ -270,14 +270,14 @@ describe('external rule preservation (issue #201)', () => {
       expect(names).toContain('VIP');
     });
 
-    it('does not destroy external rules when Bulwark regenerates after an edit', () => {
+    it('does not destroy external rules when Relay Mail regenerates after an edit', () => {
       const initial = `${generateScript([makeBulwarkRule({ name: 'Mine' })])}\n# rule:[Untouchable]\nif header :is "X-Spam" "yes" {\n    discard;\n}\n`;
 
       const parsed = parseScript(initial);
       const externalBefore = parsed.rules.filter(r => r.origin === 'external');
       expect(externalBefore).toHaveLength(1);
 
-      // Simulate a user edit - update the Bulwark rule name
+      // Simulate a user edit - update the Relay Mail rule name
       const edited = parsed.rules.map(r => (r.origin === 'external' || r.origin === 'opaque' ? r : { ...r, name: 'Mine (edited)' }));
       const regenerated = generateScript(edited, parsed.vacation, { externalRequires: parsed.externalRequires });
       const reparsed = parseScript(regenerated);
@@ -302,7 +302,7 @@ describe('external rule preservation (issue #201)', () => {
       expect(second).toBe(first);
       expect(third).toBe(first);
       expect(first).not.toMatch(/\n\n\n/);
-      expect(first).toContain('# --- External rules (managed outside Bulwark) ---\n# rule:[First]');
+      expect(first).toContain('# --- External rules (managed outside Relay Mail) ---\n# rule:[First]');
       expect(first).toContain('}\n\n# rule:[Second]');
     });
   });

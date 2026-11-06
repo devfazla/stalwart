@@ -162,7 +162,7 @@ describe('setupQuoteCollapse', () => {
   });
 
   it('collapses a bare blockquote preceded by an attribution line ending in a colon', () => {
-    // Shape of a Bulwark reply to a plain-text original (issue #480 follow-up):
+    // Shape of a Relay Mail reply to a plain-text original (issue #480 follow-up):
     // no type/class on the blockquote, attribution in the preceding <p>.
     document.body.innerHTML = `
       <div>

@@ -115,7 +115,7 @@ export function ThemesSettings({ embedded }: { embedded?: boolean } = {}) {
               <ThemeCard
                 key="default"
                 name={t('default_name')}
-                author="Bulwark"
+                author="Relay Mail"
                 isDefaultTheme
                 variants={['light', 'dark']}
                 isDark={isDark}

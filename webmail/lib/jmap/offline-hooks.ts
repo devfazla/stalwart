@@ -18,7 +18,7 @@ export interface OfflineResponse {
 
 /** What the hooks need to know about the client asking. */
 export interface OfflineClientRef {
-  /** Server URL and login, to find the Bulwark account. */
+  /** Server URL and login, to find the Relay Mail account. */
   getServerUrl(): string;
   getUsername(): string;
   getAccountId(): string;

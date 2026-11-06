@@ -11,7 +11,7 @@ import { JMAPClient } from '../jmap/client';
  * request there. The v1.0.0 release implements it; 0.16 knows none of it. So
  * ordinary requests never send any of it, and the gets whose server default
  * could grow to include metadata ask for an explicit property list instead.
- * Only the Bulwark metadata adapter (lib/jmap/bulwark-metadata.ts and the
+ * Only the Relay Mail metadata adapter (lib/jmap/bulwark-metadata.ts and the
  * client's *BulwarkMetadata methods) reads and writes it, in requests of its
  * own and only after the server has answered one (organisation features).
  */

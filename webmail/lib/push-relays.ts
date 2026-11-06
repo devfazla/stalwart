@@ -5,10 +5,11 @@
 import type { PushRelayOption, SettingsPolicy } from '@/lib/admin/types';
 import { relayAllowed } from '@/lib/outgoing-hosts';
 
-// Hosted relay so self-hosters don't need their own VAPID + Firebase setup.
-// The built-in entry can be repointed at build time via NEXT_PUBLIC_PUSH_RELAY_URL.
-export const DEFAULT_RELAY_BASE_URL =
-  process.env.NEXT_PUBLIC_PUSH_RELAY_URL || 'https://notifications.relay.bulwarkmail.org';
+// The built-in entry exists only when the deployment builds one in:
+// NEXT_PUBLIC_PUSH_RELAY_URL names the relay to offer. Unset means no built-in
+// relay at all, so nothing is contacted and the UI shows push as unavailable
+// until an admin adds relays of their own.
+export const DEFAULT_RELAY_BASE_URL = process.env.NEXT_PUBLIC_PUSH_RELAY_URL || '';
 
 export type PushRelayPolicy = Partial<
   Pick<SettingsPolicy, 'pushRelays' | 'pushRelayUrl' | 'pushRelayUrlLocked'>

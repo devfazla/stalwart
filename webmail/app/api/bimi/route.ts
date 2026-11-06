@@ -13,6 +13,9 @@ import type { BimiInfo } from '@/lib/bimi/types';
  * Ask only for messages that passed DMARC for that domain (see
  * brandIndicatorDomain in lib/email-headers.ts): the logo says who the domain
  * is, not that a given message came from it.
+ *
+ * Off until BIMI_ENABLED is set: without it this route answers "no logo" and
+ * makes no lookup.
  */
 
 const TRANSPARENT_PNG = Buffer.from(
@@ -30,6 +33,14 @@ const IMAGE_HEADERS = {
 // the same day.
 const LOGO_MAX_AGE = 6 * 60 * 60;
 const MISSING_MAX_AGE = 60 * 60;
+
+// BIMI lookups leave this server for the sender's DNS and the hosts its record
+// names, so they are opt-in: BIMI_ENABLED turns brand logos on.
+const ON_VALUES = new Set(['true', '1', 'yes', 'on']);
+
+function enabled(): boolean {
+  return ON_VALUES.has((process.env.BIMI_ENABLED ?? '').trim().toLowerCase());
+}
 
 async function requireCertificate(): Promise<boolean> {
   await configManager.ensureLoaded();
@@ -50,6 +61,17 @@ export async function GET(request: NextRequest) {
   const asJson = request.nextUrl.searchParams.get('format') === 'json';
   if (!domain) {
     return new NextResponse(null, { status: 400, headers: { 'Cache-Control': 'public, max-age=86400' } });
+  }
+
+  if (!enabled()) {
+    if (asJson) {
+      return NextResponse.json(info(null), {
+        headers: { 'Cache-Control': `public, max-age=${MISSING_MAX_AGE}` },
+      });
+    }
+    return new NextResponse(new Uint8Array(TRANSPARENT_PNG), {
+      headers: { ...IMAGE_HEADERS, 'Cache-Control': `public, max-age=${MISSING_MAX_AGE}`, 'X-Bulwark-Bimi': 'disabled' },
+    });
   }
 
   let indicator = await bimiResolver().resolve(domain);

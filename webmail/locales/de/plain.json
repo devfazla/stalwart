@@ -406,7 +406,7 @@
     },
     "security": {
       "description": "Ändern Sie Ihr Passwort und schützen Sie Ihr Konto",
-      "not_available": "Die Sicherheitseinstellungen für diesen Mailserver können Sie hier nicht ändern. Vielleicht erlaubt Ihr Server das nicht. Mehr dazu steht in der <a href=\"https://bulwarkmail.org/docs/guides/account-security\" class=\"underline hover:opacity-80\" target=\"_blank\">Dokumentation</a>.",
+      "not_available": "Die Sicherheitseinstellungen für diesen Mailserver können Sie hier nicht ändern. Vielleicht erlaubt Ihr Server das nicht. Mehr dazu steht in der Dokumentation.",
       "password": {
         "error_title": "Ihr Passwort wurde nicht geändert",
         "error_mismatch": "Die beiden neuen Passwörter sind nicht gleich. Geben Sie sie noch einmal ein.",
@@ -459,7 +459,7 @@
         "remove_error": "Der öffentliche Schlüssel konnte nicht gelöscht werden. Versuchen Sie es noch einmal."
       },
       "link_device": {
-        "description": "Melden Sie sich in der Bulwark-Mail-App auf Ihrem Handy an, ohne Ihr Passwort einzutippen. Ihr Handy bekommt eine eigene Anmeldung. Wenn Sie sich hier abmelden, bleibt Ihr Handy angemeldet.",
+        "description": "Melden Sie sich in der Relay Mail-Mail-App auf Ihrem Handy an, ohne Ihr Passwort einzutippen. Ihr Handy bekommt eine eigene Anmeldung. Wenn Sie sich hier abmelden, bleibt Ihr Handy angemeldet.",
         "error": "Der Code konnte nicht erstellt werden. Versuchen Sie es noch einmal.",
         "password_prompt": "Geben Sie Ihr Passwort ein, damit wir wissen, dass Sie es sind. Ihr Passwort wird nicht an das Handy geschickt.",
         "error_not_signed_in": "Sie wurden abgemeldet. Melden Sie sich wieder an und verbinden Sie dann Ihr Handy.",

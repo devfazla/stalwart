@@ -683,7 +683,7 @@ export interface IJMAPClient {
   getPrincipalTypes?(ids: string[]): Promise<Record<string, string> | null>;
   /** The principals behind accounts (who owns a shared calendar); missing ids are left out. Optional (demo client). */
   getAccountOwners?(ids: string[]): Promise<Record<string, Principal>>;
-  // Bulwark data in Inbox metadata (lib/jmap/bulwark-metadata.ts). Optional (demo client).
+  // Relay Mail data in Inbox metadata (lib/jmap/bulwark-metadata.ts). Optional (demo client).
   supportsBulwarkMetadata?(accountId?: string): boolean;
   getBulwarkMetadata?(accountId?: string, options?: { private?: boolean }): Promise<Record<string, unknown> | null>;
   setBulwarkMetadata?(accountId: string | undefined, key: string, value: unknown, options?: { private?: boolean }): Promise<void>;

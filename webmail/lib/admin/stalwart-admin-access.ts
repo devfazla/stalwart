@@ -2,14 +2,14 @@ import { configManager } from './config-manager';
 import { logger } from '@/lib/logger';
 
 /**
- * How a Stalwart admin account maps onto the Bulwark admin dashboard (#870).
+ * How a Stalwart admin account maps onto the Relay Mail admin dashboard (#870).
  *
  *   auto     - Stalwart admins get the shield and are signed into /admin
- *              without the Bulwark admin password (the original behaviour).
+ *              without the Relay Mail admin password (the original behaviour).
  *   password - Stalwart admins still get the shield, but /admin asks for
- *              the Bulwark admin password.
+ *              the Relay Mail admin password.
  *   off      - Stalwart admin status is ignored entirely: no shield, and
- *              only the Bulwark admin password opens /admin.
+ *              only the Relay Mail admin password opens /admin.
  */
 export type StalwartAdminAccessMode = 'auto' | 'password' | 'off';
 

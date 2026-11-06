@@ -1,37 +1,56 @@
-# Contributing to Bulwark Webmail
+# Contributing to Relay Mail
 
-Bug reports, feature requests, translations and patches are all welcome.
+This directory is a vendored subproject of the [monorepo](../README.md), so
+changes land through the repository root, not here. See
+[ROADMAP.md](../ROADMAP.md) for what the fork is and why, and
+[DEPLOY.md](../DEPLOY.md) for how it ships.
 
-The full guide is in the documentation under [Contributing](https://bulwarkmail.org/docs/development/contributing). It covers the development setup, the test suites, translations and right-to-left layouts, code style, and how pull requests are reviewed.
-
-## What fits
-
-Read [What fits in Bulwark](https://bulwarkmail.org/docs/development/contributing#what-fits-in-bulwark) before you start on a feature. In short:
-
-- Bulwark is built for Stalwart. Changes for other JMAP servers are welcome if they cost Stalwart users nothing.
-- Core is for what most people expect from a mail, calendar, contacts and files client. Niche workflows and integrations with other services belong in plugins.
-- Not in core: IMAP or other non-JMAP backends, integrations with other services, Stalwart server administration, and changes to the look that go beyond themes.
-- New behaviour gets one good default. If deployments really need different behaviour, add an admin setting, not a per-user toggle.
-- Features must work in Bulwark Lite, or be hidden there, and UI changes must work at phone width.
-
-Open an issue and agree on the approach before you write a change that is larger than about 500 lines (not counting locales and tests), adds a runtime dependency, or touches sign-in, sessions, the HTML sanitizer, the plugin sandbox, outgoing-request guards or admin routes. Deliver large features as a series of pull requests that can each be reviewed on their own. Pull requests with review feedback unanswered for 30 days are closed.
-
-To get a development server running:
+## Development setup
 
 ```bash
-git clone https://github.com/bulwarkmail/webmail.git
-cd webmail
+git clone https://github.com/devfazla/stalwart.git
+cd stalwart/webmail
 npm install
 cp .env.dev.example .env.local   # built-in mock JMAP server, no mail server needed
 npm run dev
 ```
 
-Before you open a pull request, run `npm run typecheck && npm run lint && npx vitest run`. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:` and so on).
+Before opening a pull request, run:
 
-You can use AI tools for your contributions. The guide's [AI-assisted contributions](https://bulwarkmail.org/docs/development/contributing#ai-assisted-contributions) section explains what we expect.
+```bash
+npm run typecheck && npm run lint && npx vitest run
+```
 
-By contributing, you agree that your contributions are licensed under the terms in [LICENSE](LICENSE): AGPL-3.0-only, with the additional permission for app store distribution. The permission is still provisional for older code, but it applies in full to contributions made since 30 September 2026.
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat:`, `fix:`, `docs:` and so on).
 
-- Questions: ask on [Discord](https://discord.gg/tYCujymGrT).
-- Documentation fixes: the docs are Markdown files in the [website repository](https://github.com/bulwarkmail/website/tree/main/docs).
-- Security vulnerabilities: report them privately to [dev@bulwarkmail.org](mailto:dev@bulwarkmail.org) or through a [security advisory](https://github.com/bulwarkmail/webmail/security/advisories/new), never in a public issue.
+## Ground rules inherited from the codebase
+
+These are technical constraints that are expensive to discover by hand, not
+policy:
+
+- The client is built for Stalwart. Changes for other JMAP servers are welcome
+  when they cost Stalwart users nothing.
+- New behaviour gets one good default. If deployments need different behaviour,
+  add an admin setting rather than a per-user toggle.
+- Features must work in the Lite build too, or be hidden there, and UI changes
+  must work at phone width.
+- Anything touching sign-in, sessions, the HTML sanitizer, the plugin sandbox,
+  the outgoing-request guards or admin routes needs a review from someone who
+  knows that area, and a test that fails without the change.
+- The "no third-party traffic" fence (`lib/outgoing-hosts.ts`,
+  `lib/admin/third-party-mode.ts`) is a privacy boundary. New outbound hosts
+  have to be registered there and respect the mode, not bypass it.
+- Locale files are generated and checked by `npm run test:translations`; a
+  missing key in `en` fails the build.
+
+By contributing, you agree that your contributions are licensed under the terms
+in [LICENSE](LICENSE): AGPL-3.0-only, with the additional permission for app
+store distribution. That permission is still provisional for older code but
+applies in full to contributions made since 30 September 2026.
+
+## Security issues
+
+Do not open a public issue. Report privately through a
+[GitHub security advisory](https://github.com/devfazla/stalwart/security/advisories/new)
+on the repository root.

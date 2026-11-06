@@ -72,11 +72,11 @@ export async function getInstanceId(): Promise<string> {
   throw new Error('telemetry: could not store an instance id');
 }
 
-// Default consent is 'off' - telemetry is opt-in. Admins can enable it during
-// install (BULWARK_TELEMETRY=on in .env.local), via the BULWARK_TELEMETRY env
-// var, or with one click in the admin UI. Heartbeats are anonymous: no PII,
-// just version/platform/feature toggles. Enabling helps us improve the product.
-// See https://bulwarkmail.org/docs/legal/privacy/telemetry.
+// Default consent is 'off' - telemetry is opt-in and nothing is sent, written
+// or scheduled until an admin turns it on. Admins can enable it during install
+// (BULWARK_TELEMETRY=on in the environment), via the admin UI, or by policy on
+// the desktop app. Heartbeats are anonymous: no PII, just version, platform and
+// feature toggles.
 const DEFAULTS: TelemetryStateFile = {
   consent: 'off',
   endpoint: DEFAULT_ENDPOINT,
@@ -230,10 +230,15 @@ export async function effectiveConsent(): Promise<{
 }
 
 /**
- * Where heartbeats go. On the desktop build the state file has no say, since anything on
- * the machine can write to it. A desktop user has their two switches instead.
+ * Where heartbeats go. Nothing is sent while it is empty: no collector is
+ * built in, so an operator names one with BULWARK_TELEMETRY_ENDPOINT (or the
+ * collector field on the usage-stats page) to turn reporting on at all.
+ * On the desktop build the state file has no say, since anything on the
+ * machine can write to it. A desktop user has their two switches instead.
  */
 export function telemetryEndpoint(state: TelemetryStateFile): string {
+  const envEndpoint = (process.env.BULWARK_TELEMETRY_ENDPOINT ?? '').trim();
+  if (envEndpoint) return envEndpoint;
   if (IS_DESKTOP_BUILD) return desktopServerPrivacy()?.endpoint ?? DEFAULT_ENDPOINT;
   return state.endpoint ?? DEFAULT_ENDPOINT;
 }

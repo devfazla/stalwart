@@ -825,7 +825,7 @@ function shouldEndProviderSession(account: AccountEntry | null | undefined): boo
  * active account's, when it signed in through one, else the first such account
  * in the list. Accounts on that same provider share its browser session and
  * are signed out of it together. Accounts on other providers are signed out of
- * Bulwark and their tokens revoked, but those providers' sessions stay open.
+ * Relay Mail and their tokens revoked, but those providers' sessions stay open.
  */
 export function pickEndSessionSlot(accounts: AccountEntry[], activeAccountId: string | null): number | null {
   const eligible = accounts.filter((account) => shouldEndProviderSession(account));
@@ -1342,7 +1342,7 @@ function resetRefreshBackoff(accountId?: string): void {
 }
 
 // /api/auth/token answers 503 for an upstream outage (retry forever - the IdP
-// may come back) but 500/502 for a Bulwark-side failure (misconfiguration,
+// may come back) but 500/502 for a Relay Mail-side failure (misconfiguration,
 // broken token response). The latter does not heal by waiting, so after this
 // many consecutive answers the account is evicted and the user asked to sign
 // in again instead of retrying silently forever. (#972)
@@ -2558,7 +2558,7 @@ export const useAuthStore = create<AuthState>()(
                 get().logout({ endProviderSession: false, keepLocalData: true });
                 return null;
               }
-              // A Bulwark-side failure (500/502) that keeps repeating will not
+              // A Relay Mail-side failure (500/502) that keeps repeating will not
               // heal by waiting: stop retrying and ask for a fresh sign-in. (#972)
               if (recordPermanentRefreshFailure(res.status, accountId ?? undefined)) {
                 debug.error(`Token refresh failed permanently (${res.status}) ${MAX_PERMANENT_REFRESH_FAILURES} times - signing out`);
@@ -2736,7 +2736,7 @@ export const useAuthStore = create<AuthState>()(
             // The provider session is left alone: visiting its logout page
             // would take the user away from the accounts still signed in
             // here, which may share that session. Revoking the token ends
-            // Bulwark's grant.
+            // Relay Mail's grant.
             void clearSlotCredentials(slot, wasOAuth);
             return;
           }

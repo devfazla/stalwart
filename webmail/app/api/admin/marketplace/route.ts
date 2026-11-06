@@ -52,7 +52,7 @@ const FORWARDED = ['q', 'type', 'pluginType', 'tag', 'author', 'sort', 'order', 
 /**
  * GET /api/admin/marketplace - Browse the extension directory
  *
- * Proxies the directory's `/api/v2/extensions` with this Bulwark's version
+ * Proxies the directory's `/api/v2/extensions` with this Relay Mail's version
  * and channel, so the version offered for each extension is one this
  * install can run, and marks what is already installed.
  */
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
  *
  * The version is looked up on the directory first. A version the publisher
  * withdrew ("yanked") is refused with 409 unless `force` is set - the admin
- * UI asks before sending that. A version this Bulwark is too old or too new
+ * UI asks before sending that. A version this Relay Mail is too old or too new
  * for is refused outright. Then the bundle is downloaded, its directory
  * signature checked, and it is installed under the directory slug, keeping
  * the enabled and forced flags of whatever was installed before. The replaced
@@ -193,13 +193,13 @@ export async function POST(request: NextRequest) {
     }
     if (APP_VERSION && meta.minAppVersion && compareVersions(APP_VERSION, meta.minAppVersion) < 0) {
       return NextResponse.json(
-        { error: `Needs Bulwark ${meta.minAppVersion} or later (this is ${APP_VERSION})` },
+        { error: `Needs Relay Mail ${meta.minAppVersion} or later (this is ${APP_VERSION})` },
         { status: 400 },
       );
     }
     if (APP_VERSION && meta.maxAppVersion && compareVersions(APP_VERSION, meta.maxAppVersion) > 0) {
       return NextResponse.json(
-        { error: `Version ${version} supports Bulwark up to ${meta.maxAppVersion} (this is ${APP_VERSION})` },
+        { error: `Version ${version} supports Relay Mail up to ${meta.maxAppVersion} (this is ${APP_VERSION})` },
         { status: 400 },
       );
     }

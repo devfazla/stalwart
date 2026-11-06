@@ -9,6 +9,32 @@ const CACHE_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 2 weeks
 const MAX_UPSTREAM_IN_FLIGHT = 16;
 let upstreamInFlight = 0;
 
+/**
+ * Where sender icons are fetched from.
+ *
+ * FAVICON_UPSTREAM_URL is the switch:
+ *  - unset (the default) and `off`: nothing outside is contacted at all;
+ *    icons come from this server's cache and otherwise fall back to initials.
+ *  - `public`: the public DuckDuckGo icon service below, for an operator who
+ *    wants it without running an icon service of their own.
+ *  - a template containing `{domain}` (or a base URL, to which
+ *    `{domain}.ico` is appended): your own icon service, used instead.
+ *
+ * The no-third-party traffic mode overrides all three and is checked first.
+ */
+const PUBLIC_ICONS_TEMPLATE = 'https://icons.duckduckgo.com/ip3/{domain}.ico';
+const OFF_VALUES = new Set(['off', 'false', '0', 'no', 'none', 'disabled']);
+const PUBLIC_VALUES = new Set(['public', 'duckduckgo', 'ddg']);
+
+/** The URL template for an icon, or null when no icon service is used. */
+function upstreamTemplate(): string | null {
+  const raw = (process.env.FAVICON_UPSTREAM_URL ?? '').trim();
+  if (!raw || OFF_VALUES.has(raw.toLowerCase())) return null;
+  if (PUBLIC_VALUES.has(raw.toLowerCase())) return PUBLIC_ICONS_TEMPLATE;
+  if (raw.includes('{domain}')) return raw;
+  return `${raw.replace(/\/+$/, '')}/{domain}.ico`;
+}
+
 interface CacheEntry {
   data: ArrayBuffer;
   contentType: string;
@@ -106,6 +132,13 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  // No icon service is configured (the default): everything above still
+  // serves cached icons, but nothing outside is contacted for a new domain.
+  const template = upstreamTemplate();
+  if (!template) {
+    return new NextResponse(TRANSPARENT_PNG, { headers: MISSING_FAVICON_HEADERS });
+  }
+
   // Unauthenticated and keyed by domain, so without a ceiling on concurrent
   // upstream fetches any visitor could have this instance open one
   // connection per made-up domain name. Over the ceiling the icon is simply
@@ -116,7 +149,7 @@ export async function GET(request: NextRequest) {
   upstreamInFlight++;
   try {
     const upstream = await fetch(
-      `https://icons.duckduckgo.com/ip3/${encodeURIComponent(normalizedDomain)}.ico`,
+      template.replace('{domain}', encodeURIComponent(normalizedDomain)),
       { signal: AbortSignal.timeout(5000) }
     );
 
