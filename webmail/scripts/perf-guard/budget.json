@@ -1,0 +1,22 @@
+{
+  "open": {
+    "commits": 6,
+    "renders": 630,
+    "requests": 1
+  },
+  "search": {
+    "commits": 9,
+    "renders": 513,
+    "requests": 2
+  },
+  "folder (first visit)": {
+    "commits": 7,
+    "renders": 591,
+    "requests": 2
+  },
+  "folder (revisit)": {
+    "commits": 3,
+    "renders": 337,
+    "requests": 1
+  }
+}
