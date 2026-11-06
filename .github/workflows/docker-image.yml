@@ -3,6 +3,12 @@ name: Build Docker image
 on:
   push:
     branches: [main]
+    # Rust build is the expensive one. Skip it when only webmail changed.
+    paths:
+      - 'server/**'
+      - 'webui/**'
+      - 'Dockerfile'
+      - '.github/workflows/docker-image.yml'
   workflow_dispatch:
 
 concurrency:
