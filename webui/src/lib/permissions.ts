@@ -58,7 +58,3 @@ export function canAccessView(
   if ((action === 'Create' || action === 'Destroy') && resolved.objectType.type === 'singleton') return false;
   return checkers.hasObjectPermission(resolved.permissionPrefix, action);
 }
-
-export function isCommunityEdition(edition: string): boolean {
-  return edition === 'community';
-}

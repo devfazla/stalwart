@@ -15,18 +15,18 @@
   },
   "bootstrap": {
     "complete": "Setup complete",
-    "configuredSuccessfully": "Stalwart has been configured successfully.",
+    "configuredSuccessfully": "Relay has been configured successfully.",
     "credentialsCreated": "Your administrator account has been created. Write these down now: the password will not be shown again.",
     "emptyForm": "Setup form is empty. The server did not return any bootstrap fields.",
     "failedToComplete": "Failed to complete setup.",
     "failedToLoad": "Failed to load bootstrap state.",
     "finishSetup": "Finish setup",
     "loadingSetup": "Loading setup...",
-    "nextStepBody": "restart Stalwart for the new configuration to take effect. Once restarted, sign in with the credentials above to continue administering your server.",
+    "nextStepBody": "restart Relay for the new configuration to take effect. Once restarted, sign in with the credentials above to continue administering your server.",
     "nextStepLabel": "Next step:",
     "noConfirm": "The server did not confirm the update.",
     "stepOf": "Step {{current}} of {{total}}",
-    "welcome": "Welcome to Stalwart",
+    "welcome": "Welcome to Relay",
     "welcomeSubtitle": "Let's get your server set up."
   },
   "common": {
@@ -55,32 +55,6 @@
     "search": "Search",
     "searchPlaceholder": "Search...",
     "yes": "Yes"
-  },
-  "dashboard": {
-    "allNodes": "All nodes",
-    "customEllipsis": "Custom...",
-    "customRange": "Custom range",
-    "deltaDown": "Down {{value}}",
-    "deltaNone": "No change",
-    "deltaUp": "Up {{value}}",
-    "failedFetchMetrics": "Failed to fetch metrics",
-    "from": "From",
-    "liveMetricsDisconnected": "Live metrics stream disconnected after multiple retries.",
-    "liveMetricsFailed": "Failed to connect to live metrics.",
-    "liveMetricsRejected": "The server refused the live metrics stream.",
-    "noDashboards": "No dashboards configured.",
-    "noData": "No data",
-    "node": "Node",
-    "nodeNumber": "Node {{id}}",
-    "nodeWithHost": "{{hostname}} ({{id}})",
-    "period": "Period",
-    "preset24h": "Last 24 hours",
-    "preset30d": "Last 30 days",
-    "preset7d": "Last 7 days",
-    "preset90d": "Last 90 days",
-    "refresh": "Refresh",
-    "title": "Dashboard",
-    "to": "To"
   },
   "deliveryTrace": {
     "attemptCount_one": "{{count}} attempt",
@@ -155,14 +129,6 @@
     "milliseconds": "Milliseconds",
     "minutes": "Minutes",
     "seconds": "Seconds"
-  },
-  "enterprise": {
-    "featureDisabled": "This feature requires an Enterprise license.",
-    "featureHint": "Enterprise feature",
-    "trialTitle": "Unlock Enterprise Features",
-    "trialDescription": "Get access to advanced features including multi-tenancy, AI-powered spam filtering, alerts, and more.",
-    "trialButton": "Start 30-Day Free Trial",
-    "whyNotFree": "Why is this not free?"
   },
   "errorBoundary": {
     "title": "Something went wrong",
@@ -373,12 +339,9 @@
   },
   "logo": {
     "alt": "Logo",
-    "stalwartAlt": "Stalwart Logo"
+    "stalwartAlt": "Relay logo"
   },
   "logout": "Logout",
-  "version": {
-    "label": "Stalwart WebUI v{{version}}"
-  },
   "oauth": {
     "backToLogin": "Back to login",
     "clientIdUnavailable": "Sign-in is not configured: the identity provider does not support client metadata documents and no OAuth client id is configured for this application.",
@@ -408,6 +371,80 @@
     "statusDisabled": "Two-factor authentication is not enabled.",
     "statusEnabled": "Two-factor authentication is enabled."
   },
+  "overview": {
+    "title": "Overview",
+    "subtitle": "What the server has been doing, straight from its own metrics export.",
+    "updated": "Updated {{time}}",
+    "refreshLabel": "Refresh",
+    "refreshOff": "Manual",
+    "refreshNow": "Refresh now",
+    "everySeconds": "Every {{seconds}}s",
+    "idleHint": "Servers only export a metric once it has a value, so an idle install shows mostly dashes. That is expected.",
+    "metricsDisabledTitle": "Metrics endpoint is off",
+    "metricsDisabledBody": "Open Settings, then Metrics, and set the Prometheus endpoint to Enabled. This page reads the same text export that an external Prometheus scraper would.",
+    "metricsProtectedTitle": "Metrics endpoint needs credentials",
+    "metricsProtectedBody": "The endpoint is protected with HTTP Basic auth, which a browser session cannot reuse. Clear the username and secret to let the console read it, or point an external Prometheus at it and keep this page off.",
+    "metricsUnreachableTitle": "Metrics endpoint did not answer",
+    "metricsUnreachableBody": "The console could not reach the metrics endpoint on this server. Check that this browser can still reach the API, then refresh.",
+    "gauge": {
+      "accounts": "Accounts",
+      "domains": "Domains",
+      "connections": "Open connections",
+      "memory": "Memory in use"
+    },
+    "trafficTitle": "Mail flow",
+    "trafficDescription": "Events per minute, measured between refreshes of the metrics endpoint.",
+    "trafficWaiting": "Collecting a second sample to plot rates.",
+    "series": {
+      "received": "Received",
+      "spam": "Flagged as spam",
+      "queued": "Queued for delivery",
+      "delivered": "Delivered",
+      "authFailed": "Failed logins"
+    },
+    "activityTitle": "Since the server started",
+    "activityDescription": "Cumulative counters since the server process started.",
+    "group": {
+      "ingest": "Inbound",
+      "outbound": "Outbound",
+      "access": "Access",
+      "protocols": "Connections"
+    },
+    "counter": {
+      "ham": "Accepted",
+      "spam": "Marked as spam",
+      "duplicate": "Duplicates dropped",
+      "error": "Ingest errors",
+      "queued": "Messages queued",
+      "attempted": "Delivery attempts",
+      "delivered": "Messages delivered",
+      "completed": "Attempts completed",
+      "rescheduled": "Retries scheduled",
+      "authSuccess": "Successful logins",
+      "authFailed": "Failed logins",
+      "authLocked": "Locked after retries",
+      "jmapCalls": "JMAP method calls",
+      "smtp": "SMTP",
+      "imap": "IMAP",
+      "pop3": "POP3",
+      "http": "HTTP"
+    },
+    "trustTitle": "Authentication and latency",
+    "trustDescription": "Sender authentication outcomes and average protocol request times.",
+    "security": "Inbound sender checks",
+    "ratio": {
+      "dkim": "DKIM pass rate",
+      "spf": "SPF pass rate",
+      "dmarc": "DMARC pass rate"
+    },
+    "latency": "Average request time",
+    "protocol": {
+      "smtp": "SMTP",
+      "imap": "IMAP",
+      "pop3": "POP3",
+      "http": "HTTP"
+    }
+  },
   "rate": {
     "count": "Count",
     "per": "per",
@@ -429,46 +466,13 @@
     "warningTitle": "Debug in Sievepad"
   },
   "toggleTheme": "Toggle theme",
-  "tracing": {
-    "activeFilters": "Active filters",
-    "addFilter": "Add filter",
-    "bufferFull": "(buffer full)",
-    "confirmFilter": "Add this filter",
-    "connecting": "Connecting...",
-    "date": "Date",
-    "disabled": "disabled",
-    "duration": "Duration",
-    "enabled": "enabled",
-    "eventCount_one": "{{count}} event",
-    "eventCount_other": "{{count}} events",
-    "events": "Events",
-    "failedToLoadTrace": "Failed to load trace",
-    "filterKey": "Filter key",
-    "filterValue": "Filter value",
-    "keywordsLabel": "Keywords (optional)",
-    "keywordsPlaceholder": "Enter keywords to filter events...",
-    "liveDisconnected": "Live tracing stream disconnected after multiple retries.",
-    "liveFailedStart": "Failed to start live tracing.",
-    "liveRejected": "The server refused the live tracing stream.",
-    "liveSubtitle": "Stream server events in real time.",
-    "liveTitle": "Live Tracing",
-    "noEvents": "No trace events to display.",
-    "reconnecting": "Reconnecting...",
-    "removeFilter": "Remove filter {{label}}",
-    "restart": "Restart",
-    "spanType": "Span Type",
-    "startTracing": "Start tracing",
-    "stopTracing": "Stop tracing",
-    "stopped": "Stopped",
-    "streamingEvents": "Streaming events...",
-    "traceNotFound": "Trace not found",
-    "valuePlaceholder": "Value..."
-  },
-  "tryEnterprise": "Try Enterprise",
   "userMenu": "User menu",
   "value": {
     "itemCount_one": "{{count}} item",
     "itemCount_other": "{{count}} items"
+  },
+  "version": {
+    "label": "Relay Admin v{{version}}"
   },
   "view": {
     "couldNotResolve": "Could not resolve object",

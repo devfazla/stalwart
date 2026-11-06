@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-SEL
  */
 
-import { useAccountStore, selectIsCommunity } from '@/stores/accountStore';
+import { useAccountStore } from '@/stores/accountStore';
 import { useSchemaStore } from '@/stores/schemaStore';
 import { canAccessView, createPermissionCheckers, type ObjectAction, type PermissionCheckers } from '@/lib/permissions';
 
@@ -21,8 +21,4 @@ export function useCanAccess(viewName: string | null | undefined, action: Object
   const schema = useSchemaStore((s) => s.schema);
   const checkers = usePermissionCheckers();
   return !!viewName && canAccessView(schema, viewName, action, checkers);
-}
-
-export function useIsCommunity(): boolean {
-  return useAccountStore(selectIsCommunity);
 }

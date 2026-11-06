@@ -13,9 +13,6 @@ export interface SidebarNavContextValue {
   pathname: string;
   activeViewName: string | undefined;
   isVisible: (viewName: string) => boolean;
-  isLocked: (viewName: string) => boolean;
-  openUpsell: () => void;
-  lockedHintId: string;
 }
 
 export const SidebarNavContext = createContext<SidebarNavContextValue | null>(null);

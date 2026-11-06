@@ -4,14 +4,13 @@
  * SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-SEL
  */
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, Lock } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { DynamicIcon } from '@/components/common/DynamicIcon';
-import { EnterpriseUpsell } from '@/components/common/EnterpriseUpsell';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIStore } from '@/stores/uiStore';
@@ -47,15 +46,6 @@ function NavLink({ node, depth }: { node: Extract<NavNode, { kind: 'link' }>; de
     </>
   );
   const className = cn(itemClass, itemSize(depth));
-
-  if (nav.isLocked(node.viewName)) {
-    return (
-      <button type="button" className={className} onClick={nav.openUpsell} aria-describedby={nav.lockedHintId}>
-        {content}
-        <Lock aria-hidden="true" className="ml-auto h-3 w-3 text-muted-foreground" />
-      </button>
-    );
-  }
 
   return (
     <Link
@@ -166,9 +156,7 @@ export function Sidebar() {
   const activeSection = useUIStore((s) => s.activeSection);
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
   const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
-  const { layouts, isVisible, isLocked } = useLayoutNavigation();
-  const [upsellOpen, setUpsellOpen] = useState(false);
-  const lockedHintId = useId();
+  const { layouts, isVisible } = useLayoutNavigation();
 
   useEffect(() => {
     if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false);
@@ -184,9 +172,6 @@ export function Sidebar() {
     pathname,
     activeViewName: activeViewName(nodes, pathname, layout.name),
     isVisible,
-    isLocked,
-    openUpsell: () => setUpsellOpen(true),
-    lockedHintId,
   };
 
   return (
@@ -201,9 +186,6 @@ export function Sidebar() {
         aria-label={t('sidebar.label', 'Sidebar')}
         className="fixed bottom-3 left-3 top-16 z-30 flex w-60 flex-col tile overflow-hidden"
       >
-        <span id={lockedHintId} className="sr-only">
-          {t('enterprise.featureHint', 'Enterprise feature')}
-        </span>
         <div className="flex-1 overflow-y-auto py-2.5 [scrollbar-width:thin]">
           <nav aria-label={layout.name} className="flex flex-col gap-0.5 px-2.5">
             <SidebarNavContext value={nav}>
@@ -213,8 +195,6 @@ export function Sidebar() {
         </div>
 
         {layouts.length > 1 && <SectionSwitcher layouts={layouts} activeSection={activeSection} />}
-
-        <EnterpriseUpsell open={upsellOpen} onClose={() => setUpsellOpen(false)} />
       </aside>
     </>
   );

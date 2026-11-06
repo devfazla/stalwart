@@ -167,7 +167,6 @@ export function VariantSelect({
           htmlFor={segmented ? undefined : ids.inputId}
           label={label || t('field.type', 'Type')}
           marker={null}
-          locked={false}
         />
       </div>
       <div className="min-w-0">

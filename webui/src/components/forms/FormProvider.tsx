@@ -5,7 +5,6 @@
  */
 
 import { useId, type ReactNode } from 'react';
-import { useIsCommunity } from '@/hooks/usePermissions';
 import {
   FieldScopeContext,
   FormContext,
@@ -20,7 +19,6 @@ interface FormProviderProps {
   schema: Schema;
   mode?: FormMode;
   readOnly?: boolean;
-  hideEnterprise?: boolean;
   recordLabel?: string;
   baseline?: unknown;
   tenantId?: string | null;
@@ -31,20 +29,16 @@ export function FormProvider({
   schema,
   mode = 'edit',
   readOnly = false,
-  hideEnterprise = false,
   recordLabel = '',
   baseline = null,
   tenantId = null,
   children,
 }: FormProviderProps) {
-  const isCommunity = useIsCommunity();
   const idPrefix = `f${useId().replace(/[^A-Za-z0-9_-]/g, '')}`;
   const value: FormContextValue = {
     schema,
     mode,
     readOnly,
-    hideEnterprise,
-    isCommunity,
     idPrefix,
     recordLabel,
     baseline,

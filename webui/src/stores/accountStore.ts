@@ -5,7 +5,6 @@
  */
 
 import { create } from 'zustand';
-import { isCommunityEdition } from '@/lib/permissions';
 
 export type Edition = 'enterprise' | 'community' | (string & {});
 
@@ -36,5 +35,3 @@ export const useAccountStore = create<AccountState>()((set, get) => ({
     return get().permissions.includes(`${prefix}${action}`);
   },
 }));
-
-export const selectIsCommunity = (s: AccountState): boolean => isCommunityEdition(s.edition);

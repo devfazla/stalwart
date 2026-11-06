@@ -44,11 +44,6 @@ export function viewPath(sectionName: string, viewName: string): string {
 export function pathMatchesView(pathname: string, sectionName: string, viewName: string): boolean {
   const base = viewPath(sectionName, viewName);
   if (pathname === base || pathname.startsWith(`${base}/`)) return true;
-  // SPDX-SnippetBegin
-  // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-  // SPDX-License-Identifier: LicenseRef-SEL
-  if (viewName === 'CustomComponent/Dashboard' && pathname.startsWith(`/${sectionName}/Dashboard/`)) return true;
-  // SPDX-SnippetEnd
   return false;
 }
 

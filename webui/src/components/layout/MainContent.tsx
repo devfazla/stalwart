@@ -27,22 +27,10 @@ const DeliveryTracePage = lazyFeature(
   () => import('@/features/troubleshoot/DeliveryTracePage'),
   (m) => m.DeliveryTracePage,
 );
-// SPDX-SnippetBegin
-// SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-// SPDX-License-Identifier: LicenseRef-SEL
-const DashboardView = lazyFeature(
-  () => import('@/features/dashboard/components/DashboardView'),
-  (m) => m.DashboardView,
+const OverviewPage = lazyFeature(
+  () => import('@/features/overview/OverviewPage'),
+  (m) => m.OverviewPage,
 );
-const LiveTracingPage = lazyFeature(
-  () => import('@/features/tracing/components/LiveTracingPage'),
-  (m) => m.LiveTracingPage,
-);
-const TraceDetailView = lazyFeature(
-  () => import('@/features/tracing/components/TraceDetailView'),
-  (m) => m.TraceDetailView,
-);
-// SPDX-SnippetEnd
 const ActionPage = lazyFeature(
   () => import('@/features/actions/ActionPage'),
   (m) => m.ActionPage,
@@ -51,17 +39,16 @@ const ActionPage = lazyFeature(
 interface MainContentProps {
   viewName?: string;
   id?: string;
-  section?: string;
 }
 
-export function MainContent({ viewName, id, section }: MainContentProps) {
+export function MainContent({ viewName, id }: MainContentProps) {
   const schema = useSchemaStore((s) => s.schema);
   const permissions = usePermissionCheckers();
   const location = useLocation();
   const { t } = useTranslation();
   return (
     <ErrorBoundary resetKey={location.pathname}>
-      <Suspense fallback={<LoadingFallback />}>{renderView(t, schema, permissions, viewName, id, section)}</Suspense>
+      <Suspense fallback={<LoadingFallback />}>{renderView(t, schema, permissions, viewName, id)}</Suspense>
     </ErrorBoundary>
   );
 }
@@ -72,41 +59,19 @@ function renderView(
   permissions: PermissionCheckers,
   viewName?: string,
   id?: string,
-  section?: string,
 ): ReactNode {
   if (!viewName) {
     return <LoadingFallback />;
   }
 
-  // SPDX-SnippetBegin
-  // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-  // SPDX-License-Identifier: LicenseRef-SEL
-  if (viewName.startsWith('Dashboard/')) {
-    const dashboardId = viewName.slice('Dashboard/'.length);
-    return <DashboardView dashboardId={dashboardId} section={section ?? ''} />;
-  }
-  // SPDX-SnippetEnd
-
   if (viewName.startsWith('CustomComponent/')) {
     const componentName = viewName.slice('CustomComponent/'.length);
-    // SPDX-SnippetBegin
-    // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-    // SPDX-License-Identifier: LicenseRef-SEL
-    if (componentName === 'Dashboard') {
-      const firstId = schema?.dashboards?.[0]?.id ?? 'overview';
-      return <DashboardView dashboardId={firstId} section={section ?? ''} />;
+    if (componentName === 'Overview') {
+      return <OverviewPage />;
     }
-    // SPDX-SnippetEnd
     if (componentName === 'LiveDelivery') {
       return <DeliveryTracePage />;
     }
-    // SPDX-SnippetBegin
-    // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-    // SPDX-License-Identifier: LicenseRef-SEL
-    if (componentName === 'LiveTracing') {
-      return <LiveTracingPage />;
-    }
-    // SPDX-SnippetEnd
     return (
       <div className="mt-3 rounded-2xl bg-muted p-10 text-center text-muted-foreground">
         {t('errors.unknownComponent', 'Unknown component: {{name}}', { name: componentName })}
@@ -140,13 +105,6 @@ function renderView(
   }
 
   if (id) {
-    // SPDX-SnippetBegin
-    // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-    // SPDX-License-Identifier: LicenseRef-SEL
-    if (resolved.objectName === 'x:Trace') {
-      return <TraceDetailView key={`${viewName}/${id}`} viewName={viewName} objectId={id} />;
-    }
-    // SPDX-SnippetEnd
     if (!permissions.hasObjectPermission(resolved.permissionPrefix, 'Update')) {
       return <DynamicViewPage key={`${viewName}/${id}`} viewName={viewName} objectId={id} />;
     }

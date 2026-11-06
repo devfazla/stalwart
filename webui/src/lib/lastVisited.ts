@@ -39,7 +39,6 @@ export function rememberLastVisited(section: string, viewName: string): void {
 export function sectionLandingLink(
   schema: Schema,
   layout: Layout,
-  edition: string,
   canGet: CanGet,
   hasPerm?: HasPermission,
 ): string | null {
@@ -47,12 +46,12 @@ export function sectionLandingLink(
   if (
     typeof last === 'string' &&
     layoutContainsLink(layout, last) &&
-    isLinkAccessible(schema, last, edition, canGet, hasPerm)
+    isLinkAccessible(schema, last, canGet, hasPerm)
   ) {
     return last;
   }
   return (
-    findFirstAccessibleLinkInLayout(schema, layout, edition, canGet, hasPerm) ??
+    findFirstAccessibleLinkInLayout(schema, layout, canGet, hasPerm) ??
     findFirstVisibleLinkInLayout(schema, layout, canGet, hasPerm)
   );
 }

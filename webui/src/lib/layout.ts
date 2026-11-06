@@ -6,38 +6,28 @@
 
 import type { Layout, LayoutSubItem, Schema } from '@/types/schema';
 import { resolveObject } from '@/lib/schemaResolver';
-import { isCommunityEdition, isCreateOnly } from '@/lib/permissions';
+import { isCreateOnly } from '@/lib/permissions';
 
 export type CanGet = (permissionPrefix: string) => boolean;
 export type HasPermission = (permission: string) => boolean;
 
 interface SpecialLinkInfo {
   visible: boolean;
-  enterprise: boolean;
 }
 
 interface CustomComponentRule {
   permission: string;
   backingObject?: string;
-  enterprise?: boolean;
 }
 
 const CUSTOM_COMPONENTS: Record<string, CustomComponentRule> = {
   LiveDelivery: { permission: 'liveDeliveryTest' },
-  // SPDX-SnippetBegin
-  // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-  // SPDX-License-Identifier: LicenseRef-SEL
-  Dashboard: { permission: 'liveMetrics', backingObject: 'x:Metric' },
-  LiveTracing: { permission: 'liveTracing', enterprise: true },
-  // SPDX-SnippetEnd
+  // Home-grown overview: reads /api/metrics/prometheus, which has no JMAP permission of
+  // its own, so it inherits the right to list accounts.
+  Overview: { permission: 'sysAccountQuery' },
 };
 
 function customComponentName(viewName: string): string | null {
-  // SPDX-SnippetBegin
-  // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-  // SPDX-License-Identifier: LicenseRef-SEL
-  if (viewName.startsWith('Dashboard/')) return 'Dashboard';
-  // SPDX-SnippetEnd
   if (viewName.startsWith('CustomComponent/')) return viewName.slice('CustomComponent/'.length);
   return null;
 }
@@ -51,14 +41,14 @@ function checkSpecialLink(
   const component = customComponentName(viewName);
   if (component === null) return null;
   const rule = CUSTOM_COMPONENTS[component];
-  if (!rule) return { visible: true, enterprise: false };
+  if (!rule) return { visible: true };
 
   const backing = rule.backingObject ? resolveObject(schema, rule.backingObject) : null;
-  if (rule.backingObject && !backing) return { visible: false, enterprise: false };
+  if (rule.backingObject && !backing) return { visible: false };
 
   const permitted = hasPerm ? hasPerm(rule.permission) : true;
   const readable = backing && canGet ? canGet(backing.permissionPrefix) : true;
-  return { visible: permitted && readable, enterprise: rule.enterprise ?? backing?.enterprise ?? false };
+  return { visible: permitted && readable };
 }
 
 export function isLinkVisible(schema: Schema, viewName: string, canGet: CanGet, hasPerm?: HasPermission): boolean {
@@ -66,14 +56,9 @@ export function isLinkVisible(schema: Schema, viewName: string, canGet: CanGet, 
   if (special !== null) return special.visible;
   const resolved = resolveObject(schema, viewName);
   if (resolved === null) return false;
+  if (resolved.enterprise) return false;
   if (isCreateOnly(schema, resolved.permissionPrefix)) return hasPerm?.(`${resolved.permissionPrefix}Create`) ?? false;
   return canGet(resolved.permissionPrefix);
-}
-
-export function isLinkEnterprise(schema: Schema, viewName: string): boolean {
-  const special = checkSpecialLink(schema, viewName);
-  if (special !== null) return special.enterprise;
-  return resolveObject(schema, viewName)?.enterprise ?? false;
 }
 
 function findFirstSubLink(items: LayoutSubItem[], accept: (viewName: string) => boolean): string | null {
@@ -131,25 +116,37 @@ export function findFirstVisibleLinkInLayout(
 export function isLinkAccessible(
   schema: Schema,
   viewName: string,
-  edition: string,
   canGet: CanGet,
   hasPerm?: HasPermission,
 ): boolean {
-  if (!isLinkVisible(schema, viewName, canGet, hasPerm)) return false;
-  if (isCommunityEdition(edition) && isLinkEnterprise(schema, viewName)) return false;
-  return true;
+  return isLinkVisible(schema, viewName, canGet, hasPerm);
 }
 
 export function findFirstAccessibleLinkInLayout(
   schema: Schema,
   layout: Layout,
-  edition: string,
   canGet: CanGet,
   hasPerm?: HasPermission,
 ): string | null {
-  return findFirstLink(layout, (viewName) => isLinkAccessible(schema, viewName, edition, canGet, hasPerm));
+  return findFirstLink(layout, (viewName) => isLinkAccessible(schema, viewName, canGet, hasPerm));
+}
+
+export const OVERVIEW_VIEW_NAME = 'CustomComponent/Overview';
+
+function withOverview(layouts: Layout[]): Layout[] {
+  if (layouts.length === 0 || layouts.some((layout) => layoutContainsLink(layout, OVERVIEW_VIEW_NAME))) {
+    return layouts;
+  }
+  const [first, ...rest] = layouts;
+  return [
+    {
+      ...first,
+      items: [{ link: { name: '', icon: 'Gauge', viewName: OVERVIEW_VIEW_NAME } }, ...first.items],
+    },
+    ...rest,
+  ];
 }
 
 export function visibleLayouts(schema: Schema, canGet: CanGet, hasPerm?: HasPermission): Layout[] {
-  return schema.layouts.filter((layout) => findFirstVisibleLinkInLayout(schema, layout, canGet, hasPerm) !== null);
+  return withOverview(schema.layouts.filter((layout) => findFirstVisibleLinkInLayout(schema, layout, canGet, hasPerm) !== null));
 }

@@ -9,7 +9,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { useSchemaStore } from '@/stores/schemaStore';
-import { useAccountStore } from '@/stores/accountStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useSessionInit } from '@/data/session';
 import { errorMessage } from '@/lib/jmapErrors';
@@ -49,7 +48,6 @@ export default function AdminPanel() {
 
   const { viewName, id } = parseAdminRoute(splat, (name) => !!schema && resolveObject(schema, name) !== null);
 
-  const edition = useAccountStore((s) => s.edition);
   const activeAccountId = useAuthStore((s) => s.activeAccountId);
   const setActiveSection = useUIStore((s) => s.setActiveSection);
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
@@ -60,17 +58,9 @@ export default function AdminPanel() {
 
   const searchIndex = useSchemaStore((s) => s.searchIndex);
   const pageTitle = useMemo(() => {
-    if (!section) return t('dashboard.title', 'Dashboard');
+    if (!section) return t('overview.title', 'Overview');
     if (!viewName) return section;
     let label: string | undefined;
-    // SPDX-SnippetBegin
-    // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
-    // SPDX-License-Identifier: LicenseRef-SEL
-    if (viewName.startsWith('Dashboard/')) {
-      const dashboardId = viewName.slice('Dashboard/'.length);
-      label = schema?.dashboards?.find((dashboard) => dashboard.id === dashboardId)?.label;
-    }
-    // SPDX-SnippetEnd
     if (label === undefined) {
       for (const entry of searchIndex) {
         if (entry.type !== 'link' || entry.viewName !== viewName) continue;
@@ -84,7 +74,7 @@ export default function AdminPanel() {
     const name = label ?? friendlyName(viewName);
     const title = id === 'new' ? t('form.createTitle', 'Create {{name}}', { name }) : name;
     return `${title} · ${section}`;
-  }, [section, viewName, id, searchIndex, schema, t]);
+  }, [section, viewName, id, searchIndex, t]);
 
   useDocumentTitle(pageTitle);
 
@@ -100,7 +90,7 @@ export default function AdminPanel() {
     const layouts = visibleLayouts(schema, canGet, hasPerm);
     const pickDefault = (): { layoutName: string; link: string | null } | null => {
       for (const layout of layouts) {
-        const link = findFirstAccessibleLinkInLayout(schema, layout, edition, canGet, hasPerm);
+        const link = findFirstAccessibleLinkInLayout(schema, layout, canGet, hasPerm);
         if (link) return { layoutName: layout.name, link };
       }
       if (layouts[0]) {
@@ -117,7 +107,7 @@ export default function AdminPanel() {
       if (link) navigate(`/${layoutName}/${link}`, { replace: true });
     };
 
-    if (section && viewName && !isLinkAccessible(schema, viewName, edition, canGet, hasPerm)) {
+    if (section && viewName && !isLinkAccessible(schema, viewName, canGet, hasPerm)) {
       const fallback = pickDefault();
       if (fallback && (fallback.layoutName !== section || fallback.link !== viewName)) {
         redirectTo(fallback.layoutName, fallback.link);
@@ -134,7 +124,7 @@ export default function AdminPanel() {
 
     if (section) {
       const ownLayout = layouts.find((l) => l.name.toLowerCase() === section.toLowerCase());
-      const ownLink = ownLayout ? sectionLandingLink(schema, ownLayout, edition, canGet, hasPerm) : null;
+      const ownLink = ownLayout ? sectionLandingLink(schema, ownLayout, canGet, hasPerm) : null;
       if (ownLayout && ownLink) {
         redirectTo(ownLayout.name, ownLink);
       } else {
@@ -153,7 +143,6 @@ export default function AdminPanel() {
     schema,
     setActiveSection,
     navigate,
-    edition,
     canGet,
     hasPerm,
     isBootstrapMode,
@@ -198,7 +187,7 @@ export default function AdminPanel() {
           className={`min-w-0 flex-1 px-3 pb-28 pt-2 transition-[margin] sm:px-5 ${sidebarOpen ? 'md:ml-[252px]' : ''}`}
         >
           <ErrorBoundary key={activeAccountId ?? 'none'}>
-            <MainContent viewName={viewName} id={id} section={section} />
+            <MainContent viewName={viewName} id={id} />
           </ErrorBoundary>
         </main>
       </div>

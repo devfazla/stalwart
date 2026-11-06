@@ -276,7 +276,7 @@ export function BootstrapWizard() {
       <div className="space-y-3.5">
         <div className="flex flex-wrap items-end justify-between gap-4 px-1 pb-2 pt-3">
           <div>
-            <h1 className="page-title">{t('bootstrap.welcome', 'Welcome to Stalwart')}</h1>
+            <h1 className="page-title">{t('bootstrap.welcome', 'Welcome to Relay')}</h1>
             <p className="mt-1.5 text-sm text-muted-foreground">
               {t('bootstrap.welcomeSubtitle', "Let's get your server set up.")}
             </p>
@@ -293,7 +293,7 @@ export function BootstrapWizard() {
         <section className="tile @container px-5 pb-1.5 sm:px-6">
           {current.title && <h2 className="section-title pb-1 pt-5">{current.title}</h2>}
           <fieldset disabled={saving} className={cn('min-w-0 divide-y divide-border', !current.title && 'pt-1')}>
-            <FormProvider schema={schema} mode="create" hideEnterprise>
+            <FormProvider schema={schema} mode="create">
               {current.fields.map(({ formField, field }) => (
                 <FieldRow
                   key={formField.name}

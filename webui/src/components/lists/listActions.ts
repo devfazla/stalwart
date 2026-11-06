@@ -11,12 +11,11 @@ import { filteredListSearch } from './listUrlState';
 
 export interface ActionPermissions {
   hasObjectPermission: (permissionPrefix: string, action: ObjectAction) => boolean;
-  isCommunity: boolean;
 }
 
 export type ResolvedItemAction =
   | { key: string; kind: 'separator' }
-  | { key: string; kind: 'navigate'; label: string; objectName: string; fieldName?: string; locked: boolean }
+  | { key: string; kind: 'navigate'; label: string; objectName: string; fieldName?: string }
   | { key: string; kind: 'mutation'; action: Extract<ItemAction, { type: 'delete' | 'setProperty' }> };
 
 function actionIdentity(action: ItemAction | MassAction): string {
@@ -75,15 +74,14 @@ export function resolveItemActions(
       case 'query': {
         const target = resolveObject(schema, action.objectName);
         if (!target) break;
-        const locked = !!target.enterprise && perms.isCommunity;
-        if (!locked && !perms.hasObjectPermission(target.permissionPrefix, 'Get')) break;
+        if (target.enterprise) break;
+        if (!perms.hasObjectPermission(target.permissionPrefix, 'Get')) break;
         out.push({
           key,
           kind: 'navigate',
           label: action.label,
           objectName: action.objectName,
           fieldName: action.type === 'query' ? action.fieldName : undefined,
-          locked,
         });
         break;
       }

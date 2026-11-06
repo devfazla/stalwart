@@ -13,8 +13,6 @@ export interface FormContextValue {
   schema: Schema;
   mode: FormMode;
   readOnly: boolean;
-  hideEnterprise: boolean;
-  isCommunity: boolean;
   idPrefix: string;
   recordLabel: string;
   baseline: unknown;
@@ -44,10 +42,6 @@ export function useFieldScope(): FieldScope {
 
 export function useInPanel(): boolean {
   return useContext(PanelContext);
-}
-
-export function isEnterpriseLockedIn(ctx: FormContextValue, enterprise: boolean | undefined): boolean {
-  return !!enterprise && ctx.isCommunity;
 }
 
 export function fieldDomId(idPrefix: string, path: readonly string[]): string {
