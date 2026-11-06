@@ -47,8 +47,11 @@ Two legitimate routes, and we will use both:
 
 1. **Reimplement.** Writing our own version of a feature is fully permitted. AGPL protects code, not
    ideas. Where the community build already exposes the data, this is cheap. The dashboard is the
-   clearest example: `/api/live/metrics` exists in the community build
-   (`server/crates/http/src/api/mod.rs:333`), so a dashboard is feasible without any enterprise code.
+   clearest example: `/api/metrics/prometheus` is served in the community build, so a dashboard is
+   feasible without any enterprise code. (An earlier note here claimed `/api/live/metrics` was
+   available; it is not, because that route is inside a `LicenseRef-SEL` snippet at
+   `server/crates/http/src/api/mod.rs:326-345` and answers nothing unless
+   `is_enterprise_edition()` is true. The dashboard was built on the Prometheus exporter instead.)
 2. **Hide.** Where a feature needs absent enterprise backend, we remove the menu entry and the upsell
    instead of leaving a locked dead end. This is the fallback for anything too expensive to build.
 
@@ -81,7 +84,8 @@ Decisions inside this workstream:
 - Remove `EnterpriseUpsell` (`webui/src/components/layout/TopBar.tsx:108`) and every other
   promotional surface: donation, sponsor, forum, blog, and "buy" links.
 - Strip the ownership and contact claims in `server/AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`,
-  and the CNAME, or delete those files if they serve no purpose for us.
+  and the CNAME, or delete those files if they serve no purpose for us. Done, see the log entry;
+  `AGENTS.md`, the CNAME and both nested `.github/` trees were deleted outright.
 - For each locked field, decide hide versus reimplement. Nothing gets unlocked.
 
 ## Workstream C: webmail rebrand
@@ -97,13 +101,19 @@ Goal: create, edit, delete mailboxes programmatically.
 Open items, all of which need evidence rather than assumption:
 
 - Confirm the exact principal and directory routes the community build exposes, and their methods.
-- Auth model. The UI uses OAuth; a server-to-server client needs a token flow that does not depend
-  on a browser. Needs verifying, not guessing.
+  Done in `docs/API.md`, from source.
+- Auth model. Done: HTTP Basic with an API key is the non-interactive path; the OAuth code flow
+  needs a browser. The discovery document answers 200 on the live server.
 - A new subdomain means DNS, a Coolify domain assignment, and OAuth redirect-origin registration for
   `admin.shopstatesideglobal.com`. The CIMD `sameDomain` policy we patched only accepts the document
   published on the server's own registrable domain, so a second hostname needs checking against it.
-- CORS and `X-Forwarded-Proto` behavior on the new hostname. The proto patch already landed.
+  Still operator action; `admin.shopstatesideglobal.com/api/schema` did answer 401, which shows the
+  API is reachable there.
+- CORS and `X-Forwarded-Proto` behavior on the new hostname. The proto patch already landed. CORS
+  matters for the webmail origin, not for a same-origin admin panel.
 - A smoke-test script that exercises create, read, update, delete against a throwaway account.
+  Written as `scripts/api-smoke.sh`; **not yet run**, it needs an API key.
+- Enable the Prometheus exporter, or the Overview page stays on its setup note. See the log entry.
 
 ---
 
@@ -120,6 +130,37 @@ Naming scope to keep consistent: image `ghcr.io/devfazla/relay`, compose service
 `relay-webmail`, volumes `relay-config` / `relay-data`.
 
 ---
+
+## Two dependencies still in the build
+
+The goal was no third-party runtime dependency, and the images meet that. These do not, and
+both need an operator decision rather than a blind change.
+
+1. **Cargo git dependencies.** `server/Cargo.toml:137-140` pins `hickory-proto`, `hickory-net`,
+   `hickory-resolver` and `librocksdb-sys` to `github.com/stalwartlabs/*` on the
+   `stalwart/0.26` and `stalwart/0.25` branches, and `server/Cargo.lock` fixes them to
+   `f8b92b17fa6c7d09a6959672592106ca1410937b` and `f6169ca36d74c15637f8c6396c34e82aa73d0d47`.
+   These are patched forks the server genuinely needs: the DNS resolver carries Stalwart's
+   own fixes and the RocksDB binding its build options. Removing the dependency means
+   vendoring both trees into this repo, which is roughly a hundred megabytes of C sources for
+   the RocksDB one, and it cannot be verified here at all because this machine has no Rust
+   toolchain. Done blind it would break the image build, which is the one failure that takes
+   the mail server down. Left as it is, with the pins recorded above.
+2. **`Application.resource_url` default.** In a non-dev build the compiled default is
+   `https://github.com/stalwartlabs/webui/releases/download/v2/webui.zip`
+   (`server/crates/common/src/manager/defaults.rs:65-66`), so a fresh install would download
+   the interface from upstream. The root `Dockerfile` rewrites that literal to
+   `file:///opt/stalwart/webui.zip` and the build fails if the string it targets moves, so
+   the shipped image never reaches out. A locally built `cargo build --release` binary still
+   has the upstream default; the `dev_mode` feature is what avoids it locally.
+
+## Decisions still owed
+
+- Whether to vendor the two Rust forks above, mirror them under our own org, or accept the
+  pinned dependency.
+- Whether the eleven `DOCS_URL` help links in the webmail admin organisation sections, which point
+  at `bulwarkmail.org/docs`, should point at our own documentation once it exists. They are the
+  only in-product help today.
 
 ## Conflict analysis: adding webmail beside the live server
 
@@ -164,6 +205,61 @@ Audited `webmail/docker-compose.yml` and `webmail/.env.example` against the runn
 Ordering consequence: the compose change must wait until CI actually builds the webmail image,
 otherwise a deploy fails on a missing image and the server is left running the old release.
 
+## Webmail call-home audit
+
+`lib/admin/third-party-mode.ts:26-28` shows the upstream default is **off**, meaning every built-in
+outside host is reachable unless the deployment pins it. So `NO_THIRD_PARTY_TRAFFIC=true` in
+`docker-compose.yml` is what closes these, and it cannot be re-opened from the admin panel once set
+in the environment (`third-party-mode.ts:9-11`).
+
+| Outbound host | Feature | State in our deploy |
+|---|---|---|
+| `telemetry.bulwarkmail.org` | instance heartbeat and crash reports | double-closed: `BULWARK_TELEMETRY=off` locks it, and the mode blocks the host anyway |
+| `version.telemetry.bulwarkmail.org` | "update available" banner | `BULWARK_UPDATE_CHECK=off`; the check also needs an explicit `BULWARK_UPDATE_CHECK_URL` before it ever runs (`lib/version-check/state.ts:94`) |
+| `notifications.relay.bulwarkmail.org` | web push relay | removed the default: `DEFAULT_RELAY_BASE_URL` is now empty (`lib/push-relays.ts:12`), so the feature is off until an operator names a relay |
+| `extensions.bulwarkmail.org` | admin marketplace directory | blocked by the mode; still the value of `OFFICIAL_DIRECTORY` (`lib/admin/directory-keys.ts:19`) because that string also validates signed plugin statements, and inventing our own would break verification without a directory we run |
+| `connector.bulwarkmail.org` | connector docs and extension links | blocked by the mode |
+| `icons.duckduckgo.com` | sender favicon fallback | blocked by the mode |
+| `api.mymemory.translated.net` | message translation | blocked by the mode; point `LIBRETRANSLATE_URL` at our own instance to re-enable |
+| `www.google.com` | map link on a calendar event | blocked by the mode |
+| `randomuser.me`, `img.freepik.com` | demo mode fixtures | unreachable: `DEMO_MODE` is unset |
+| `bulwarkmail.org` | docs links in admin sections | left as text. Dead links are a honesty problem, not a privacy one; rewriting them to our own domain would point at pages that do not exist |
+
+The two volume names that used to back these (`relay-telemetry`, `relay-version-check`) are kept
+mounted but stay empty: the app writes consent state and the last check result there, and dropping
+the mounts would make the container fail on a read-only filesystem instead of simply having nothing
+to say.
+
+## What still reads "Bulwark", and why
+
+Display text is all Relay. What is left is load-bearing, in the same category as the
+`urn:stalwart:*` tokens on the server side:
+
+- **HTTP header names** `X-Bulwark-Policy-Scope`, `X-Bulwark-Policy-Domains`,
+  `X-Bulwark-Label`, `x-bulwark-reload-probe`: request/response wire fields whose peers
+  are not all in this repo.
+- **Service Worker storage keys and cache prefixes** in `public/sw.js`
+  (`bulwark-shell-*`, `bulwark-sw-state-v1`, `/__bulwark/*`, `bulwark-mail:` notification
+  tags). These persist in every user's browser; renaming orphans the old entries instead of
+  migrating them. The one header rename that was safe, `X-Bulwark-Build` → `X-Relay-Build`,
+  was made because the emitter and its only reader are both in this repo.
+- **Method and type names** (`getBulwarkMetadata`, `BulwarkDesktopBridge`, `isBulwarkRule`)
+  and the JMAP metadata extension they map onto.
+- **Windows/macOS policy identifiers** in `desktop-policies/` and
+  `lib/desktop/policy-templates.ts` (`Software\Policies\Bulwark\Desktop`, ADMX category
+  names). The user-visible `displayName` in those files is already "Relay".
+- **Env var names** `BULWARK_TELEMETRY`, `BULWARK_UPDATE_CHECK`, `BULWARK_BASE_PATH` and the
+  rest, because operators, docs and CI already speak them.
+- **`extensions.bulwarkmail.org`** as a signed-statement type URI (`lib/admin/directory-keys.ts`).
+  It is a verification identifier, not a link we ask anyone to visit.
+
+**Help links kept deliberately.** Eleven admin sections and the monitoring page carry a
+`DOCS_URL` pointing at upstream documentation, rendered as inline text like "How labels work".
+These are functional references to the only documentation that describes the features we ship;
+deleting them would leave the admin UI with no reference at all, and pointing them at our repo
+would 404 because we have not written those pages. They are not promotional surfaces and render
+no upstream branding. Revisit if we ever write our own docs.
+
 ## Progress
 
 | ID | Item | Status |
@@ -171,20 +267,95 @@ otherwise a deploy fails on a missing image and the server is left running the o
 | A1 | Verify Bulwark license terms | done: AGPL-3.0-only, keep LICENSE and NOTICE |
 | A2 | Choose Lite vs full edition | decided: full |
 | A3 | Import `webmail/` with clean history | done: vendored, no `.git`, README row, CI job |
-| A4 | Add webmail service to root `docker-compose.yml` | blocked by A3 CI run: image must exist first |
+| A4 | Add webmail service to root `docker-compose.yml` | done: second service in one resource, pulls `relay-webmail:main`, own `relay-*` volumes, `expose` not `ports`, no `env_file` |
 | B1 | Brand name chosen | decided: Relay |
-| B2 | Strip upsell and promotional UI | not started |
-| B3 | Rename product and logo | blocked by B1 |
-| B4 | Audit locked fields, hide or plan reimplementation | not started |
-| B5 | Dashboard, reimplement on `/api/live/metrics` | not started |
-| C1 | Webmail promotional and call-home audit | blocked by A3 |
-| C2 | Webmail rename and restyle | blocked by A3, B1 |
-| D1 | Enumerate mailbox CRUD routes with evidence | not started |
-| D2 | Non-interactive auth for API client | not started |
-| D3 | DNS plus Coolify domain for admin subdomain | not started |
-| D4 | API smoke test | blocked by D1, D2 |
+| B2 | Strip upsell and promotional UI | done: SEL-gated UI deleted, every `enterprise`-flagged link hidden centrally in `webui/src/lib/layout.ts` |
+| B3 | Rename product and logo | done: client-visible `Stalwart` → `Relay` in webui and server protocol strings; protocol tokens, `urn:stalwart:*`, `vnd.stalwart.*` and API-key prefix left alone |
+| B4 | Audit locked fields, hide or plan reimplementation | done: hidden, not unlocked. The backend is absent, so reimplementation was only viable where community data exists |
+| B5 | Dashboard, reimplement on community metrics | done: `webui/src/features/overview/` reads `/api/metrics/prometheus`, the only community-legal source |
+| C1 | Webmail promotional and call-home audit | done: see the call-home table below |
+| C2 | Webmail rename and restyle | done: locales, UI copy, assets, image labels and package metadata. Remaining `Bulwark` strings are wire identifiers and cache keys, listed below |
+| D1 | Enumerate mailbox CRUD routes with evidence | done: `docs/API.md`, every claim tied to a file and line |
+| D2 | Non-interactive auth for API client | done: HTTP Basic and JMAP auth methods documented, permission list verified from `enums.rs` |
+| D3 | DNS plus Coolify domain for admin subdomain | operator action: needs DNS and a Coolify domain assignment, cannot be done from the repo |
+| D4 | API smoke test | written: `scripts/api-smoke.sh`, syntax-checked. Not run against a live server |
+| D5 | Live read-only probe of the endpoints | done: see the log entry and `docs/API.md` §8; the Prometheus exporter is still off on the server |
+| E1 | Strip upstream ownership claims from policy docs | done: `server/AGENTS.md`, `server/CNAME`, `server/.github/`, `webui/.github/`, the security process and template files, and both marketing `img/` trees deleted; server and WebUI README, `server/CONTRIBUTING.md` and `server/SECURITY.md` rewritten for this fork |
+| E2 | Report the dependencies the goal does not yet meet | done: two Cargo git forks and the compiled `resource_url` default, both documented with pins |
 
 ## Log
+
+- 2026-11-07: Ownership and contact claims removed from the policy docs. Deleted
+  `server/AGENTS.md` (it instructed AI agents to route bugs to `support.stalw.art`, refuse
+  pull requests and not file advisories, which is upstream's policy applied to our repo),
+  `server/CNAME` (`get.stalw.art`), `server/.github/` (issue, discussion and PR templates,
+  `allowed-pr-authors.txt` naming upstream contributors, `dependabot.yml` and seven inert
+  workflow files including the auto-close bots), `webui/.github/workflows/build.yml` (publishes
+  upstream's `webui.zip` releases), `server/SECURITY_PROCESS.md`, `server/SECURITY_TEMPLATE.md`
+  and the `img/` logo and demo-gif trees in both `server/` and `webui/`. Rewrote
+  `server/README.md`, `server/CONTRIBUTING.md`, `server/SECURITY.md` and `webui/README.md` as
+  fork docs: no badges, no social or support portal links, no enterprise or OpenCollective
+  pitch, and the real developer content kept (`VITE_*` variables, `build.sh`, the `resource_url`
+  wiring, cargo and clippy checks). `server/UPGRADING/` and both `CHANGELOG.md` files stay as
+  upstream reference, and are now labelled as such in the READMEs; the code's own SPDX headers
+  and `LICENSES/` were not touched, since authorship metadata is a license condition and not
+  branding.
+  Verified: nothing references a deleted path (grep for `img/`, `server/.github`,
+  `allowed-pr-authors`, the deleted files), `webui` typecheck exits 0 after the changes. Not
+  verified: no Rust build, so the cargo commands in `server/CONTRIBUTING.md` are transcribed from
+  `server/Cargo.toml` rather than executed here.
+- 2026-11-07: Live read-only probe of `mail.shopstatesideglobal.com` with anonymous `curl`,
+  recorded in `docs/API.md` §8. `/.well-known/jmap` → 307 → `/jmap/session`, which returns a
+  real capabilities document; `/jmap` → 404 on GET, correct, that branch only matches POST
+  (`server/crates/http/src/request.rs:144-145`); `/.well-known/oauth-authorization-server` → 200;
+  `/api/schema` → 401. **`/api/metrics/prometheus` → 404**, so the new Overview page has no data
+  source yet: the `prometheus` field of the `Metrics` settings object defaults to `Disabled`
+  (`server/crates/registry/src/schema/structs_impl.rs:44481`) and the route is only mounted when it
+  is enabled (`server/crates/common/src/config/telemetry.rs:729`, `server/crates/http/src/request.rs:721-722`).
+  The page already handles this: a 404 maps to the "Metrics endpoint is off" note, not an error
+  (`webui/src/features/overview/useOverviewMetrics.ts:40`). Operator action: Settings → Metrics →
+  Prometheus endpoint = Enabled. Nothing credential-based has been exercised; the smoke script is
+  still unrun.
+- 2026-11-07: Webmail branding finished. New Relay artwork authored and committed:
+  `public/branding/Relay_Favicon.svg`, `Relay_Logo_Color.svg`, `Relay_Logo_White.svg`,
+  two lettered wordmark SVGs, plus PNGs rasterised from them (`sharp`, which is already a
+  dependency) for `icon-192x192`, `icon-512x512`, the four maskable variants,
+  `apple-touch-icon` and the three branding PNGs the admin picker and OG image expect.
+  All 47 references to `Bulwark_Favicon` / `Bulwark_Logo_*` across 18 files repointed and the
+  eight upstream asset files deleted. The mark is a double chevron on a `#1E4FD8` tile; the
+  lettered PNGs are pre-rendered rather than SVG-with-`<text>`, because the Alpine runtime
+  image has no fonts and `sharp` would rasterise the wordmark blank at request time.
+- 2026-11-07: Remaining webmail traces removed. `org.opencontainers.image.vendor` was still
+  `rbm.systems` in both Dockerfiles; `package.json` still named Bulwark Mail as author and
+  pointed repository, homepage and bugs at `github.com/bulwarkmail/webmail`; Settings → About
+  linked its AGPL source at the upstream repo (now ours, and `SOURCE_CODE_URL` overrides it);
+  `webmail/deploy/demo-deploy.sh` deployed to upstream's own demo host and was deleted; the
+  Kubernetes manifests pulled `ghcr.io/bulwarkmail/webmail`; `README.md` and `CONTRIBUTING.md`
+  were rewritten as fork docs without badges, banner, Discord or live-demo links;
+  `ACCESSIBILITY.md` links repointed. The login page's GitHub star fetch and the
+  `X-Powered-By: bulwarkmail.org` header were already gone, but the header test still asserted
+  the removed value and was failing; it now asserts the header is absent.
+  Verified: `npx vitest run` in `webmail/` passed 4363 tests with 0 failures. Not verified: the
+  Next.js typecheck still cannot run in this environment (it is OOM-killed), so the asset
+  renames are covered by tests and grep, not by `tsc`.
+
+- 2026-11-07: `docker-compose.yml` gained the `webmail` service, resolving the conflict analysis
+  point by point. One resource, two services, so a deploy can never start a second RocksDB writer.
+  Webmail uses `expose: ["3000"]` with no host publish, its own six `relay-*` volumes with no path
+  or name shared with `stalwart-config` / `stalwart-data`, and no `env_file` (the referenced
+  `.env.local` is gitignored and a missing env_file fails a Coolify deploy). It pulls
+  `ghcr.io/devfazla/relay-webmail:main` with the local `build:` block kept commented, mirroring the
+  server service. `NO_THIRD_PARTY_TRAFFIC=true`, `BULWARK_TELEMETRY=off` and
+  `BULWARK_UPDATE_CHECK=off` are pinned in the environment. `SESSION_SECRET` is deliberately unset:
+  the app generates one on first boot and stores it in `relay-admin-state`, so no secret sits in the
+  repo and it survives upgrades. `webmail/docker-compose.yml` now builds from the local context
+  instead of pulling `ghcr.io/bulwarkmail/webmail:latest`.
+  Verified: both files parse as YAML, no duplicate keys, no volume name appears in more than one
+  service, no port is published by webmail, and no compose file references an upstream image.
+  Not verified: `docker compose config` (no Docker on this machine) and any actual deploy.
+- 2026-11-07: `DEPLOY.md` rewritten around the per-subproject build matrix, two domains, the CORS
+  step the webmail needs, webmail volume backups, and webmail-specific troubleshooting. Corrected
+  the earlier claim that `/api/live/metrics` is in the community build.
 - 2026-11-07: `webmail/` vendored. Upstream `.git` (19 MiB of history) and `.github/`
   (10 workflows pointing at `bulwarkmail` runners, secrets and GHCR) deleted; `LICENSE`,
   `NOTICE` and all file-level headers kept. 4281 files staged, no `node_modules` or build
