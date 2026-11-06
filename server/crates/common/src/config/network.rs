@@ -201,7 +201,7 @@ impl Network {
             }),
             info: Info {
                 provider: Provider {
-                    name: "Stalwart".into(),
+                    name: "Relay".into(),
                     ..Default::default()
                 },
                 ..Default::default()

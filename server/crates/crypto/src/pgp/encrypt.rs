@@ -60,7 +60,7 @@ const MAX_MESSAGE_LEN: usize = u32::MAX as usize - (1 << 20);
 const MIME_HEADER_START: &[u8] =
     b"Content-Type: multipart/encrypted;\r\n\tprotocol=\"application/pgp-encrypted\";\r\n\tboundary=\"";
 const MIME_HEADER_END: &[u8] =
-    b"\"\r\n\r\nOpenPGP/MIME message (Automatically encrypted by Stalwart)\r\n\r\n";
+    b"\"\r\n\r\nOpenPGP/MIME message (Automatically encrypted by Relay)\r\n\r\n";
 const VERSION_PART: &[u8] =
     b"\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n\r\n";
 const DATA_PART: &[u8] = b"\r\nContent-Type: application/octet-stream; name=\"encrypted.asc\"\r\nContent-Disposition: inline; filename=\"encrypted.asc\"\r\n\r\n";

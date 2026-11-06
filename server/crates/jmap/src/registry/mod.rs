@@ -38,7 +38,7 @@ impl EnterpriseRegistry for Server {
 
         Err(trc::JmapEvent::Forbidden.into_err().details(concat!(
             "This feature is only available in the Enterprise edition. ",
-            "Obtain your trial license at https://license.stalw.art/trial."
+            "Contact your administrator to obtain a license."
         )))
     }
     // SPDX-SnippetEnd

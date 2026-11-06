@@ -395,7 +395,7 @@ components:
         WWW-Authenticate:
           schema:
             type: string
-            example: Bearer realm="Stalwart Server"
+            example: Bearer realm="Relay Server"
       content:
         application/problem+json:
           schema:

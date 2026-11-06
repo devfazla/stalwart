@@ -724,7 +724,7 @@ fn verify_manifest<R: Read + Seek>(archive: &mut ZipArchive<R>, url: &str) -> tr
         let server_semver = Semver::current();
         if min_server_semver > server_semver {
             return Err(manifest_error().details(format_compact!(
-                "Incompatible application bundle: {} version {} requires Stalwart {min_server_semver} or later, running {server_semver}",
+                "Incompatible application bundle: {} version {} requires Relay {min_server_semver} or later, running {server_semver}",
                 manifest.id,
                 manifest.version
             )));

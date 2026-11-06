@@ -16,7 +16,7 @@ use std::sync::LazyLock;
 pub mod core;
 pub mod op;
 
-static SERVER_GREETING: &str = "Stalwart IMAP4rev2 at your service.";
+static SERVER_GREETING: &str = "Relay IMAP4rev2 at your service.";
 
 const AUTH_CAPABILITIES: [AuthCapability; 3] = [
     AuthCapability::Disabled,

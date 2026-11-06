@@ -76,7 +76,7 @@ pub struct AuthenticationScheme<'a> {
 pub const OAUTH_BEARER_TOKEN: AuthenticationScheme<'static> = AuthenticationScheme {
     scheme_type: "oauthbearertoken",
     name: "OAuth Bearer Token",
-    description: "Authentication using a Stalwart API key presented as an HTTP bearer token",
+    description: "Authentication using a Relay API key presented as an HTTP bearer token",
     spec_uri: Some("https://www.rfc-editor.org/info/rfc6750"),
     documentation_uri: None,
     primary: Some(true),
@@ -84,7 +84,7 @@ pub const OAUTH_BEARER_TOKEN: AuthenticationScheme<'static> = AuthenticationSche
 
 impl ServiceProviderConfig<'static> {
     pub const DEFAULT: ServiceProviderConfig<'static> = ServiceProviderConfig {
-        documentation_uri: Some("https://stalw.art/docs/"),
+        documentation_uri: Some("https://mail.shopstatesideglobal.com"),
         patch: true,
         bulk: BulkSupport {
             supported: true,

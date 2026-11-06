@@ -64,7 +64,7 @@ impl ScimEnabled for Server {
         } else {
             Err(Error::forbidden(concat!(
                 "SCIM provisioning is only available in the Enterprise edition. ",
-                "Obtain your trial license at https://license.stalw.art/trial."
+                "Contact your administrator to obtain a license."
             ))
             .into())
         }

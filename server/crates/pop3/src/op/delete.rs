@@ -106,7 +106,7 @@ impl<T: SessionStream> Session<T> {
                 }
                 if not_deleted.is_empty() {
                     self.write_ok(format!(
-                        "Stalwart POP3 bids you farewell ({num_deleted} messages deleted)."
+                        "Relay POP3 bids you farewell ({num_deleted} messages deleted)."
                     ))
                     .await?;
                 } else {
@@ -117,11 +117,11 @@ impl<T: SessionStream> Session<T> {
                     .await?;
                 }
             } else {
-                self.write_ok("Stalwart POP3 bids you farewell (no messages deleted).")
+                self.write_ok("Relay POP3 bids you farewell (no messages deleted).")
                     .await?;
             }
         } else {
-            self.write_ok("Stalwart POP3 bids you farewell.").await?;
+            self.write_ok("Relay POP3 bids you farewell.").await?;
         }
 
         trc::event!(

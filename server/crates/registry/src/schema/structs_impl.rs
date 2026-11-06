@@ -9608,6 +9608,8 @@ impl Pickle for Calendar {
 impl Default for Calendar {
     fn default() -> Self {
         Self {
+            // webmail/lib/default-collection-name.ts matches this literal by regex to spot the
+            // auto-created calendar, so renaming it makes that collection look user-created.
             default_display_name: Some("Stalwart Calendar".to_string()),
             default_href_name: Some("default".to_string()),
             max_attendees: 20u64,
@@ -9829,7 +9831,7 @@ impl Pickle for CalendarAlarm {
         let field3: String = if block.has(3) {
             Pickle::unpickle(stream)?
         } else {
-            "Stalwart Calendar".to_string()
+            "Relay Calendar".to_string()
         };
         let field4: Duration = if block.has(4) {
             Pickle::unpickle(stream)?
@@ -9873,7 +9875,7 @@ impl Default for CalendarAlarm {
             allow_external_rcpts: false,
             enable: true,
             from_address: Default::default(),
-            from_name: "Stalwart Calendar".to_string(),
+            from_name: "Relay Calendar".to_string(),
             min_trigger_interval: Duration::from_millis(3600000),
             // SPDX-SnippetBegin
             // SPDX-FileCopyrightText: 2020 Stalwart Labs LLC <hello@stalw.art>
@@ -48520,7 +48522,7 @@ impl MtaStageConnect {
         ExpressionContext {
             expr: &self.smtp_greeting,
             default: Some(Expression {
-                else_: "system('hostname') + ' Stalwart ESMTP at your service'".to_string(),
+                else_: "system('hostname') + ' Relay ESMTP at your service'".to_string(),
                 ..Default::default()
             }),
             property: Property::SmtpGreeting,
@@ -48582,7 +48584,7 @@ impl Pickle for MtaStageConnect {
             Pickle::unpickle(stream)?
         } else {
             Expression {
-                else_: "system('hostname') + ' Stalwart ESMTP at your service'".to_string(),
+                else_: "system('hostname') + ' Relay ESMTP at your service'".to_string(),
                 ..Default::default()
             }
         };
@@ -48615,7 +48617,7 @@ impl Default for MtaStageConnect {
     fn default() -> Self {
         Self {
             smtp_greeting: Expression {
-                else_: "system('hostname') + ' Stalwart ESMTP at your service'".to_string(),
+                else_: "system('hostname') + ' Relay ESMTP at your service'".to_string(),
                 ..Default::default()
             },
             hostname: Expression {

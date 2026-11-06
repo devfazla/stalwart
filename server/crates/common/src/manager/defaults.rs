@@ -59,7 +59,7 @@ async fn insert_safe_defaults(bp: &mut Bootstrap) -> trc::Result<()> {
         bp.registry
             .write(RegistryWrite::insert(
                 &Application {
-                    description: "Stalwart Web Interface".to_string(),
+                    description: "Relay Web Interface".to_string(),
                     enable: true,
                     #[cfg(not(feature = "dev_mode"))]
                     resource_url:

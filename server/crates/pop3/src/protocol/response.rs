@@ -225,7 +225,7 @@ impl<T: ListValue> Response<'_, T> {
                     "EXPIRE NEVER",
                     "UIDL",
                     "UTF8",
-                    "IMPLEMENTATION Stalwart Server",
+                    "IMPLEMENTATION Relay Server",
                 ] {
                     buf.extend_from_slice(capa.as_bytes());
                     buf.extend_from_slice(b"\r\n");

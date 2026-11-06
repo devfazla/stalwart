@@ -13,7 +13,7 @@ use scim_proto::{CONTENT_TYPE, ResourceType, message::error::Error as ScimError}
 use std::fmt::Write;
 use store::registry::write::RegistryWriteResult;
 
-pub const REALM: &str = "Bearer realm=\"Stalwart SCIM\"";
+pub const REALM: &str = "Bearer realm=\"Relay SCIM\"";
 
 pub type Result<T> = std::result::Result<T, Error>;
 

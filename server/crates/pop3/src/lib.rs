@@ -22,7 +22,7 @@ pub mod op;
 pub mod protocol;
 pub mod session;
 
-static SERVER_GREETING: &str = "+OK Stalwart POP3 at your service.\r\n";
+static SERVER_GREETING: &str = "+OK Relay POP3 at your service.\r\n";
 
 #[derive(Clone)]
 pub struct Pop3SessionManager {

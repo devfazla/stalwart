@@ -1173,7 +1173,7 @@ impl<T: SessionStream> Session<T> {
         }
         headers.extend_from_slice(b"by ");
         headers.extend_from_slice(self.hostname.as_bytes());
-        headers.extend_from_slice(b" (Stalwart SMTP) with ");
+        headers.extend_from_slice(b" (Relay SMTP) with ");
         headers.extend_from_slice(match (self.stream.is_tls(), !self.is_authenticated()) {
             (true, true) => b"ESMTPS",
             (true, false) => b"ESMTPSA",

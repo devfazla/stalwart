@@ -217,7 +217,7 @@ pub(crate) async fn bootstrap_set(
                         .with_property(Property::DataStore)
                         .with_description(concat!(
                             "The selected data store was created by an older version ",
-                            "or a different edition of Stalwart and cannot be used."
+                            "or a different edition of Relay and cannot be used."
                         )),
                 );
                 break;
