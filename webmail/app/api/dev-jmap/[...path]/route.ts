@@ -18,6 +18,7 @@ import { isNoThirdPartyTrafficOn } from '@/lib/admin/third-party-mode';
 const ACCOUNT_ID = 'dev-account-001';
 const scheduledSubmissions: Array<{ id: string; emailId: string; identityId: string; sendAt: string; undoStatus: 'pending' | 'final' | 'canceled' }> = [];
 const emailCreationIds = new Map<string, string>();
+const DEFAULT_PUSH_RELAY_ORIGIN = 'https://notifications.relay.bulwarkmail.org';
 
 interface MockPushSubscription {
   id: string;
@@ -2186,12 +2187,10 @@ async function handlePushSubscriptionSet(args: MethodArgs, callId: string): Prom
   if (create) {
     for (const [creationId, data] of Object.entries(create)) {
       try {
-        const relayUrl = (process.env.NEXT_PUBLIC_PUSH_RELAY_URL ?? '').trim();
-        if (!relayUrl) {
-          throw new Error('The dev mock only sends verification to a configured push relay');
-        }
         const url = new URL(String(data.url ?? ''));
-        const allowedOrigin = new URL(relayUrl).origin;
+        const allowedOrigin = new URL(
+          process.env.NEXT_PUBLIC_PUSH_RELAY_URL || DEFAULT_PUSH_RELAY_ORIGIN,
+        ).origin;
         if (url.origin !== allowedOrigin || !url.pathname.startsWith('/api/push/jmap/')) {
           throw new Error('The dev mock only sends verification to the configured push relay');
         }

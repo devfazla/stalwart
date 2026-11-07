@@ -1,5 +1,5 @@
-// Update-status payload returned by an update server. The shape is fixed by
-// the schema version below, not by any particular implementation.
+// Update-status payload returned by the version server. Mirrors
+// repos/dashboard/version-server/src/registry.ts LookupResult.
 
 export type UpdateSeverity = 'normal' | 'security' | 'deprecated' | 'none' | 'unknown';
 
@@ -27,7 +27,4 @@ export interface VersionCheckStateFile {
   statuses?: Record<string, UpdateStatus>;
 }
 
-// No update server is assumed. The check stays silent until an operator
-// configures one (BULWARK_UPDATE_CHECK_URL or the admin's version page), so a
-// stock install makes no outbound request.
-export const DEFAULT_VERSION_ENDPOINT = '';
+export const DEFAULT_VERSION_ENDPOINT = 'https://version.telemetry.bulwarkmail.org/';

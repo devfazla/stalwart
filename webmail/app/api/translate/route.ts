@@ -11,17 +11,12 @@ import { isNoThirdPartyTrafficOn, thirdPartyRefusal } from '@/lib/admin/third-pa
 // and return { translatedText, detectedSource } in a stable shape.
 //
 // Two providers:
-//   - "libretranslate" — the deployment's own instance, when the host sets
-//                       LIBRETRANSLATE_URL (and optionally LIBRETRANSLATE_API_KEY
-//                       or LIBRETRANSLATE_API_KEY_FILE). Supports native source
-//                       auto-detection. This is the default whenever it is
-//                       configured, so message text stays on infrastructure
-//                       the operator controls.
-//   - "mymemory"       — the public MyMemory API, used only when the operator
-//                       sets MYMEMORY_ENABLED and no LibreTranslate is
-//                       configured. NO_THIRD_PARTY_TRAFFIC refuses it too.
-// With neither configured the route answers 503 instead of contacting a
-// third party.
+//   - "mymemory"     — public MyMemory API, no configuration required. Its
+//                       langpair needs an explicit source language, so when the
+//                       plugin asks for "auto" we detect it locally first.
+//   - "libretranslate" — only available when the host sets LIBRETRANSLATE_URL
+//                       (and optionally LIBRETRANSLATE_API_KEY or LIBRETRANSLATE_API_KEY_FILE). Supports native
+//                       source auto-detection.
 
 export const runtime = 'nodejs';
 
@@ -290,27 +285,7 @@ export async function POST(request: NextRequest) {
   const text = typeof body.text === 'string' ? body.text.trim() : '';
   const target = typeof body.target === 'string' && body.target.trim() ? body.target.trim() : 'en';
   const source = typeof body.source === 'string' && body.source.trim() ? body.source.trim() : 'auto';
-  // A LibreTranslate instance is preferred: with one configured, nothing leaves
-  // this container unless the operator has also opted into the public service.
-  const ownTranslate = !!(process.env.LIBRETRANSLATE_URL ?? '').trim();
-  const mymemory = (process.env.MYMEMORY_ENABLED ?? '').trim().toLowerCase();
-  const publicTranslate = mymemory === 'true' || mymemory === '1' || mymemory === 'yes';
-  const requested =
-    body.provider === 'mymemory' ? 'mymemory'
-    : body.provider === 'libretranslate' ? 'libretranslate'
-    : '';
-  let provider: Provider = requested || (ownTranslate ? 'libretranslate' : 'mymemory');
-  if (provider === 'mymemory' && !publicTranslate) provider = ownTranslate ? 'libretranslate' : '';
-  if (!provider) {
-    return NextResponse.json(
-      {
-        error:
-          'No translation backend is configured. Set LIBRETRANSLATE_URL to your own instance, ' +
-          'or MYMEMORY_ENABLED=true to use the public MyMemory API.',
-      },
-      { status: 503 },
-    );
-  }
+  const provider: Provider = body.provider === 'libretranslate' ? 'libretranslate' : 'mymemory';
   // MyMemory is a public service; the admin's own LibreTranslate is not (#903).
   if (provider === 'mymemory' && await isNoThirdPartyTrafficOn()) {
     return thirdPartyRefusal('Translation through MyMemory');

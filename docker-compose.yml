@@ -108,8 +108,8 @@ services:
       # Settings > HTTP > CORS allowed origins, or requests are blocked.
       JMAP_SERVER_URL: https://mail.shopstatesideglobal.com
 
-      # Everything below keeps the client on infrastructure we control.
-      # The upstream default is fail-closed, but naming each switch here means a
+      # Everything below keeps the client on infrastructure we control. The
+      # switches are pinned here rather than left to the shipped defaults, so a
       # future config.json edit cannot silently reopen a third-party host.
       NO_THIRD_PARTY_TRAFFIC: "true"   # fences telemetry, update check, push relay,
                                         # marketplace directory, icon/translation proxies

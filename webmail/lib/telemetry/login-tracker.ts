@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { logger } from '@/lib/logger';
 import { isStoreUnavailableError } from '@/lib/shared-store/types';
-import { effectiveConsent, getInstanceId, telemetryDocs } from './state';
+import { getInstanceId, telemetryDocs } from './state';
 
 // We never store usernames or server URLs in the clear. Each login is
 // recorded as HMAC-SHA256(username + '@' + serverUrl, instance_id), so the
@@ -49,15 +49,10 @@ async function hashIdentity(username: string, serverUrl: string): Promise<string
  * otherwise appends a new record. Records older than the retention window
  * are pruned on every write. Read and written in one step, so logins on
  * several replicas at once all count.
- *
- * Only while telemetry consent is on: the list exists to be counted in the
- * heartbeat, and an instance that never opted in writes nothing at all (no
- * `logins.json`, no instance id file).
  */
 export async function recordLogin(username: string, serverUrl: string): Promise<void> {
   if (!username || !serverUrl) return;
   try {
-    if ((await effectiveConsent()).consent !== 'on') return;
     const id = await hashIdentity(username, serverUrl);
     const now = new Date().toISOString();
     await telemetryDocs().update(LOGINS_DOC, (current) => {

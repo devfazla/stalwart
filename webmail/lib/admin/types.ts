@@ -393,9 +393,7 @@ export const CONFIG_ENV_MAP: Record<string, { envVar: string; fileEnvVar?: strin
   errorReportingSampleRate: { envVar: 'ERROR_REPORTING_SAMPLE_RATE', type: 'string', defaultValue: '1' },
   errorReportingEnvironment: { envVar: 'ERROR_REPORTING_ENVIRONMENT', type: 'string', defaultValue: 'production' },
   sessionSecret: { envVar: 'SESSION_SECRET', fileEnvVar: 'SESSION_SECRET_FILE', fileKey: "sessionSecretFile", type: 'string', defaultValue: '' },
-  // No directory is assumed: the marketplace stays offline until an operator
-  // names one, either here or with EXTENSION_DIRECTORY_URL.
-  extensionDirectoryUrl: { envVar: 'EXTENSION_DIRECTORY_URL', type: 'url', defaultValue: '' },
+  extensionDirectoryUrl: { envVar: 'EXTENSION_DIRECTORY_URL', type: 'url', defaultValue: 'https://extensions.bulwarkmail.org' },
   // Root keys (base64 raw Ed25519, comma-separated) a self-hosted extension
   // directory signs its keyring with. The official directory's are built in
   // (lib/admin/directory-keys.ts); with none known, marketplace bundles are

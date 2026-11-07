@@ -315,7 +315,9 @@ describe('settings search in the desktop app', () => {
   it('keeps the app rows out of a browser, and the browser push rows out of the app', () => {
     expect(inBrowser('tray')).not.toContain('desktop: Keep running in the tray when closed');
     expect(inBrowser('quiet hours')).not.toContain('notifications: Quiet hours');
-    expect(inAppResults('relay')).toEqual([]);
+    // The product name contains "Relay", so the app's own About row matches the
+    // query; the browser-only push row still must not.
+    expect(inAppResults('relay')).not.toContain('privacy: Relay for notifications');
     expect(inBrowser('relay')).toContain('privacy: Relay for notifications');
   });
 });

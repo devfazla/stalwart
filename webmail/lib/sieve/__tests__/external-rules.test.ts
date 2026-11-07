@@ -392,7 +392,7 @@ describe('external rule preservation (issue #201)', () => {
         });
       }
 
-      const headerCount = (script.match(/# --- External rules \(managed outside Bulwark\) ---/g) || []).length;
+      const headerCount = (script.match(/# --- External rules \(managed outside (?:Relay Mail|Bulwark)\) ---/g) || []).length;
       expect(headerCount).toBe(1);
     });
 

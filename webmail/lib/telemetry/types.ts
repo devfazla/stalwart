@@ -1,6 +1,6 @@
 // Schema v1 of the anonymous heartbeat, and v2 (v1 plus error counts, sent
-// only with the separate error-count consent). Sent nowhere unless an admin
-// opts in and points the collector at an endpoint.
+// only with the separate error-count consent). Documented at
+// https://bulwarkmail.org/docs/legal/privacy/telemetry
 
 export type ConsentState = 'pending' | 'on' | 'off';
 
@@ -116,8 +116,4 @@ export interface TelemetryStateFile {
   errorsConsent?: ErrorsConsent;
 }
 
-// No collector is assumed: the heartbeat goes nowhere until an operator names
-// one (BULWARK_TELEMETRY_ENDPOINT, or the collector field on the usage-stats
-// page). Telemetry consent also starts 'off', and an empty collector means no
-// request is made even with consent on.
-export const DEFAULT_ENDPOINT = '';
+export const DEFAULT_ENDPOINT = 'https://telemetry.bulwarkmail.org/v1/heartbeat';

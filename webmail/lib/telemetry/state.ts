@@ -76,7 +76,9 @@ export async function getInstanceId(): Promise<string> {
 // or scheduled until an admin turns it on. Admins can enable it during install
 // (BULWARK_TELEMETRY=on in the environment), via the admin UI, or by policy on
 // the desktop app. Heartbeats are anonymous: no PII, just version, platform and
-// feature toggles.
+// feature toggles. The upstream privacy note is at
+// https://bulwarkmail.org/docs/legal/privacy/telemetry; the admin panel's
+// System > Outgoing hosts lists every host and the switch that turns it off.
 const DEFAULTS: TelemetryStateFile = {
   consent: 'off',
   endpoint: DEFAULT_ENDPOINT,
@@ -230,9 +232,10 @@ export async function effectiveConsent(): Promise<{
 }
 
 /**
- * Where heartbeats go. Nothing is sent while it is empty: no collector is
- * built in, so an operator names one with BULWARK_TELEMETRY_ENDPOINT (or the
- * collector field on the usage-stats page) to turn reporting on at all.
+ * Where heartbeats go. BULWARK_TELEMETRY_ENDPOINT repoints the collector at an
+ * install's own; otherwise the project default applies. Consent still gates the
+ * send, and the no-third-party traffic mode refuses the request whatever both
+ * say.
  * On the desktop build the state file has no say, since anything on the
  * machine can write to it. A desktop user has their two switches instead.
  */

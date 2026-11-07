@@ -198,32 +198,22 @@ export function VersionPage() {
         <SettingsSection
           id="source"
           title="Source"
-          description="Hourly check against an update server. Off until an endpoint is configured; BULWARK_UPDATE_CHECK=off forces it off and BULWARK_UPDATE_CHECK_URL sets the endpoint. Severity is decided server-side."
+          description="Hourly check against the project version server. Severity is decided server-side and disable with BULWARK_UPDATE_CHECK=off."
         >
           <SettingItem
             label="Endpoint"
-            description={
-              data.endpoint
-                ? data.endpoint === data.defaultEndpoint
-                  ? 'Default endpoint.'
-                  : `Default: ${data.defaultEndpoint || 'none configured'}`
-                : 'No endpoint configured, so no check is made.'
-            }
+            description={data.endpoint === data.defaultEndpoint ? 'Default endpoint.' : `Default: ${data.defaultEndpoint}`}
           >
-            {data.endpoint ? (
-              <a
-                href={data.endpoint}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-foreground hover:underline break-all"
-              >
-                {data.endpoint} <ExternalLink className="w-3 h-3 shrink-0" />
-              </a>
-            ) : (
-              <span className="text-sm text-muted-foreground">Not configured</span>
-            )}
+            <a
+              href={data.endpoint}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-sm text-foreground hover:underline break-all"
+            >
+              {data.endpoint} <ExternalLink className="w-3 h-3 shrink-0" />
+            </a>
           </SettingItem>
-          <SettingItem label="Disabled by env" description="Checks run only with BULWARK_UPDATE_CHECK=on plus an endpoint, or with BULWARK_UPDATE_CHECK_URL set. BULWARK_UPDATE_CHECK=off always disables.">
+          <SettingItem label="Disabled by env" description="Set BULWARK_UPDATE_CHECK=off to disable.">
             <span className={`text-sm font-medium ${data.disabledByEnv ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
               {data.disabledByEnv ? 'Yes' : 'No'}
             </span>

@@ -76,22 +76,10 @@ export async function updateState(change: (state: VersionCheckStateFile) => void
   });
 }
 
-/**
- * Off by default. An install contacts nothing unless the operator opts in,
- * either with BULWARK_UPDATE_CHECK=on plus an endpoint, or by pointing
- * BULWARK_UPDATE_CHECK_URL at an update server of their own. BULWARK_UPDATE_CHECK
- * =off (or false/0/no) is an explicit off and always wins.
- */
 export function disabledByEnv(): boolean {
-  const v = (process.env.BULWARK_UPDATE_CHECK ?? '').trim().toLowerCase();
+  const v = (process.env.BULWARK_UPDATE_CHECK ?? '').toLowerCase();
   if (v === 'off' || v === 'false' || v === '0' || v === 'no') return true;
-  if (v === 'on' || v === 'true' || v === '1' || v === 'yes') return false;
-  return !envEndpointConfigured();
-}
-
-/** True when the environment names an update endpoint (empty string = off). */
-function envEndpointConfigured(): boolean {
-  return (process.env.BULWARK_UPDATE_CHECK_URL ?? '').trim().length > 0;
+  return false;
 }
 
 export function effectiveEndpoint(state: VersionCheckStateFile): string {
@@ -99,7 +87,7 @@ export function effectiveEndpoint(state: VersionCheckStateFile): string {
   // without editing on-disk state. An explicit empty value disables the check.
   const envUrl = process.env.BULWARK_UPDATE_CHECK_URL;
   if (envUrl !== undefined) return envUrl.trim();
-  return state.endpoint;
+  return state.endpoint || DEFAULT_VERSION_ENDPOINT;
 }
 
 export function getCurrentVersion(): string {

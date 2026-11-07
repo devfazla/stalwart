@@ -59,8 +59,12 @@ Tests run on Vitest and Playwright.
   its own favicon, logos and PWA icons under `public/branding/`.
 - No promotional surfaces: the upstream banner, badges, Discord and live-demo
   links, and the star count on the login page are gone.
-- No call-home: the defaults above keep every built-in third-party host
-  unreachable, and the push relay has no built-in address.
+- No call-home in this deployment: the upstream outbound hosts are still the
+  compiled defaults, and `NO_THIRD_PARTY_TRAFFIC=true` (with
+  `BULWARK_TELEMETRY=off` and `BULWARK_UPDATE_CHECK=off`) fences all of them
+  before any request. An env value there wins over the admin panel, so a config
+  edit cannot reopen a host; `lib/admin/outgoing-hosts-registry.ts` lists each
+  host and the switch that turns it off.
 - Vendored without upstream git history. File-level SPDX headers, `LICENSE` and
   `NOTICE` are unchanged.
 

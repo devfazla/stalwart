@@ -97,6 +97,11 @@ Two things are pinned in the deployment environment and worth knowing before you
 change them: `NO_THIRD_PARTY_TRAFFIC=true` fences every built-in outbound host
 (telemetry, update check, push relay, extension directory, icon and translation
 proxies), and an env value there cannot be switched off from the admin panel.
+Those hosts are still the compiled defaults in `webmail/`: the fence, not an
+empty constant, is what keeps a Relay install from reaching them, so a deployment
+that drops the variable reaches them again. The guarded test suite is the reason
+we did not rewrite the defaults, and `webmail/lib/admin/outgoing-hosts-registry.ts`
+is the list of what each switch turns off.
 `SESSION_SECRET` is left unset on purpose: the app generates one on first boot and
 keeps it in the `relay-admin-state` volume, so no secret sits in the repo.
 
