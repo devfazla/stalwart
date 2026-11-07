@@ -315,7 +315,9 @@ no upstream branding. Revisit if we ever write our own docs.
   they did before; nothing runs differently.
   Verified: the five files together give 140 passed and 4 skipped; eslint clean on all of them; the
   four specs typecheck under a config that includes them, because `tsconfig.json` excludes
-  `integration` and the normal `npx tsc --noEmit` never reads them.
+  `integration` and the normal `npx tsc --noEmit` never reads them. Full run: `npx vitest run
+  --silent` on `webmail/` exits 0 with 2060 files passed and 2 skipped (2062) and 21835 tests passed
+  and 16 skipped (21851). No test file fails, so the suite is clean for the first time in this fork.
 - 2026-11-07: The webmail suite measured against the vendor commit, and the 56 regressions the
   rebrand caused are gone. Method: `git worktree add` at `691d1a4` with `node_modules` junctioned
   in, then the same file list on both trees. Of the 34 files failing on `HEAD`, 10 (53 tests) fail
