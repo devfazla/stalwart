@@ -391,7 +391,9 @@ describe('a server build', () => {
   });
 });
 
-// So a typo in the path can't quietly turn the checks above off on a machine with the repo.
-it.skipIf(process.env.CI)('finds the collector on this machine', () => {
+// So a typo in the path can't quietly turn the checks above off on a machine that
+// asked for the dashboard checkout. Without that environment variable there is no
+// collector to find, so the guard would only ever fire on a stranger's laptop.
+it.skipIf(process.env.CI || !process.env.BULWARK_DASHBOARD_DIR)('finds the collector on this machine', () => {
   expect(collector).not.toBeNull();
 });

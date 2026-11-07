@@ -12,12 +12,14 @@ export interface CollectorValidator {
 
 /**
  * The validator on the branch the desktop app ships against, read from git so it doesn't
- * matter what the dashboard checkout has out. Null where there's no dashboard repo (CI).
+ * matter what the dashboard checkout has out. Null without `BULWARK_DASHBOARD_DIR`:
+ * the dashboard is a separate repository, and CI and ordinary checkouts have neither
+ * it nor a path to it.
  */
 export async function loadCollectorValidator(): Promise<CollectorValidator | null> {
-  const repo = process.env.BULWARK_DASHBOARD_DIR ?? 'C:/Users/info/Downloads/jmap-webmail/repos/dashboard';
+  const repo = process.env.BULWARK_DASHBOARD_DIR ?? '';
   const ref = process.env.BULWARK_DASHBOARD_REF ?? 'feat/desktop-platform';
-  if (!existsSync(repo)) return null;
+  if (!repo || !existsSync(repo)) return null;
   const shown = spawnSync('git', ['-C', repo, 'show', `${ref}:telemetry-collector/src/validate.ts`], { encoding: 'utf8' });
   if (shown.status !== 0) throw new Error(`no validator at ${ref}: ${shown.stderr}`);
   const file = path.join(mkdtempSync(path.join(tmpdir(), 'bw-validator-')), 'validate.ts');

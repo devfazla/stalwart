@@ -46,7 +46,7 @@ import {
 test.describe.configure({ mode: 'serial' });
 test.setTimeout(240_000);
 
-const PLUGINS_DIR = process.env.IT_PLUGINS_DIR ?? 'C:/Users/info/worktrees/plugins-enterprise';
+const PLUGINS_DIR = process.env.IT_PLUGINS_DIR ?? '';
 const LINK_ZIP = `${PLUGINS_DIR}/external-link-warning/external-link-warning.zip`;
 const SEND_ZIP = `${PLUGINS_DIR}/send-checks/send-checks.zip`;
 const LINK = 'external-link-warning';

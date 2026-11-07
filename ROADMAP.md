@@ -72,7 +72,7 @@ Decisions inside this workstream:
 - **Lite or full.** Lite fits the existing model: build to static, bundle into the image like
   `webui.zip` is bundled today, no new container. Full adds a second service to
   `docker-compose.yml`, a Node runtime, and its own state.
-- Import with a squashed initial commit, then rewrite authorship, same as the `gitikram` cleanup.
+- Import with a squashed initial commit, then rewrite authorship, same as the vendor-import cleanup.
   File-level copyright headers stay.
 - Verify Bulwark's actual `LICENSE` file before importing. The badge says AGPL v3 with app store
   distribution permissions, which needs reading rather than assuming.
@@ -285,6 +285,37 @@ no upstream branding. Revisit if we ever write our own docs.
 
 ## Log
 
+- 2026-11-07: The 8 carried webmail failures diagnosed and fixed. Each was first reproduced in a
+  one-file run, so none is blamed on machine load without evidence. None of the eight is a product
+  defect; all of them are in the tests or in the paths the tests reach for.
+  - `blob-routing` (3): the menu's export is fire-and-forget, and the test asserted on the line
+    after the click, a few microtasks too early. The behaviour it wants is correct and does happen
+    (`hooks/use-message-file-actions.ts:73` calls `downloadBlob` with `{ kind: 'export' }` on the
+    message owner). Instrumentation on the three early returns showed one item, no desktop shell,
+    and the call made, so the assertions now wait for it instead of the code changing.
+  - `push-preview` (3): the route module costs about two seconds to transform on a cold worker, and
+    both files import it inline inside the first test, which charged that time to its 5 s timeout.
+    Under the full-suite load the first test then timed out, and its abandoned JMAP call resolved
+    during the second test and answered with the primary account where the shared one was asked
+    for. Moving the import into a `beforeAll` hook puts the cost against the hook timeout: 2549 ms
+    and 2566 ms became 11 ms and 9 ms, and the wrong-account failure goes with them.
+  - `health-route` (1): the route divides the mocked `heapUsed` by the process's real V8 heap limit
+    to pick its warning tier, so which sentence it emits depended on the machine (90.9% of a 4.4 GB
+    limit reads "high"; this box's 2.35 GB limit read "very high" and the wording assertion failed).
+    The test now stubs `node:v8`, and the assertion says what the route promises rather than what
+    the host reports.
+  - `telemetry-desktop` (1): the guard at the foot of the file asserts the upstream telemetry
+    collector is reachable here, resolved through a hard-coded path into the upstream author's own
+    home directory. Without that checkout the collector is null, the three tests that use it skip,
+    and the guard fails on every other machine on earth. The path is gone; `BULWARK_DASHBOARD_DIR`
+    now decides, and the guard only runs when somebody sets it.
+  The same leak was in four integration specs: a built-plugin zip, an enterprise plugins directory,
+  and two screenshot output paths, all naming that same personal home. They read `IT_*` variables or
+  the temp directory now. Two already skipped when their file was missing, so those skip the way
+  they did before; nothing runs differently.
+  Verified: the five files together give 140 passed and 4 skipped; eslint clean on all of them; the
+  four specs typecheck under a config that includes them, because `tsconfig.json` excludes
+  `integration` and the normal `npx tsc --noEmit` never reads them.
 - 2026-11-07: The webmail suite measured against the vendor commit, and the 56 regressions the
   rebrand caused are gone. Method: `git worktree add` at `691d1a4` with `node_modules` junctioned
   in, then the same file list on both trees. Of the 34 files failing on `HEAD`, 10 (53 tests) fail
@@ -312,12 +343,8 @@ no upstream branding. Revisit if we ever write our own docs.
   exactly the load-balancer bug the two tests that read upstream's unvendored `.github/` were
   written to catch. Both tests now read our workflow, and the seed is per run.
   Result: `npx vitest run --silent` on `webmail/` gives 2055 files passed, 5 failed, 2 skipped;
-  21828 tests passed, 8 failed, 15 skipped. The 8 all fail at the vendor commit too, so they are
-  carried rather than caused: `blob-routing` (3) exports the attachment blob where the test wants the
-  raw one, `push-preview-route` (3) times out at 5 s and resolves the primary account where a shared
-  one is asked for, `health-route` (1) trips its own wording guard because this machine reports 170%
-  of the V8 heap limit, and `telemetry-desktop` (1) looks for a desktop-app collector path on the
-  host, which `it.skipIf(process.env.CI)` skips in CI.
+  21828 tests passed, 8 failed, 15 skipped. All 8 fail under the same test names at the vendor
+  commit, so they are carried rather than caused. The entry above this one diagnoses and fixes them.
 - 2026-11-07: Ownership and contact claims removed from the policy docs. Deleted
   `server/AGENTS.md` (it instructed AI agents to route bugs to `support.stalw.art`, refuse
   pull requests and not file advisories, which is upstream's policy applied to our repo),
@@ -416,4 +443,4 @@ Bulwark's ancestry stays visible in the repo no matter what we do to commit meta
 Stalwart: file-level SPDX headers naming Stalwart Labs LLC are a license condition, not branding.
 
 What we can legitimately scrub is commit authorship, remote URLs, marketing copy, upsell UI, and
-promotional links. That is already how the `gitikram` cleanup worked and it is the boundary here.
+promotional links. That is already how the vendor-import cleanup worked, and it is the boundary here.

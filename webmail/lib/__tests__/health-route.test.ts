@@ -18,6 +18,16 @@ vi.mock('@/lib/logger', () => ({
   },
 }));
 
+// The route divides the mocked heapUsed by the process's real V8 heap limit to
+// pick its warning tier, so without this the wording depends on the machine and
+// the Node flags it started with. 4.4 GB puts the case below at 90.9%, inside
+// the "high" band and under the 95% "very high" one.
+vi.mock('node:v8', () => {
+  const getHeapStatistics = () => ({ heap_size_limit: 4_400_000_000 });
+  // The route uses the default import, so both shapes must carry the stub.
+  return { getHeapStatistics, default: { getHeapStatistics } };
+});
+
 describe('health route', () => {
   beforeEach(() => {
     vi.restoreAllMocks();

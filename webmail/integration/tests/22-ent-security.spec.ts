@@ -1,4 +1,6 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { folderRow } from './helpers/app';
 import {
   ENT,
@@ -125,7 +127,7 @@ async function openMessage(page: Page, subject: string): Promise<void> {
   await expect(row).toBeVisible({ timeout: 60_000 }).catch(async (error) => {
     const rows = await page.locator('[data-testid="email-list-item"]').evaluateAll((els) => els.map((e) => `${e.getAttribute('data-subject')} | ${(e as HTMLElement).innerText.replace(/\s+/g, ' ').slice(0, 80)}`));
     console.log('rows:', JSON.stringify(rows), 'url:', page.url());
-    await page.screenshot({ path: `C:/Users/info/AppData/Local/Temp/claude/ent-a-fail-${Date.now()}.png` }).catch(() => {});
+    await page.screenshot({ path: join(tmpdir(), `ent-a-fail-${Date.now()}.png`) }).catch(() => {});
     throw error;
   });
   await row.click();

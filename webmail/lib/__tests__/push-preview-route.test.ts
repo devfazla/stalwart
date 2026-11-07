@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import { endlessResponse } from './helpers/endless-body';
 import { loginFingerprint } from '@/lib/pwa-notify/login-fingerprint';
 
@@ -85,6 +85,13 @@ async function callRoute(accountId: string, emailId: string | null = null) {
   };
   return { status: res.status, body: await res.json() };
 }
+
+// A cold worker spends a second or two transforming the route module, and an
+// inline `await import()` charges that to the first test's 5 s budget. Loading
+// it in a hook spends it against the hook timeout instead.
+beforeAll(async () => {
+  await import('@/app/api/push/preview/route');
+});
 
 describe('push preview route account resolution', () => {
   beforeEach(() => {

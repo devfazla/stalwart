@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 
 // Two logins in one browser: slot 0 is Bob, slot 1 is Alice, and Alice shares
 // a folder with Bob. Alice's account is then listed in Bob's session too, but
@@ -90,6 +90,12 @@ async function callRoute(accountId: string, emailId: string | null) {
   };
   return { status: res.status, body: await res.json() };
 }
+
+// See push-preview-route.test.ts: the cold transform of the route belongs in a
+// hook, not in the first test's 5 s budget.
+beforeAll(async () => {
+  await import('@/app/api/push/preview/route');
+});
 
 describe('push preview for an account shared into another login', () => {
   beforeEach(() => {

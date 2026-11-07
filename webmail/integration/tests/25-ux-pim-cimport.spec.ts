@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { contextOptions } from './helpers/ent';
 import { JmapClient } from './helpers/jmap';
 import { accountSwitcher, neutralizeDevOverlay } from './helpers/app';
@@ -19,7 +21,7 @@ const CORE = 'urn:ietf:params:jmap:core';
 const CONTACTS = 'urn:ietf:params:jmap:contacts';
 const RUN = Date.now().toString(36);
 const PREFIX = 'UXFIX-cimport';
-const SHOTS = 'C:/Users/info/Downloads/jmap-webmail/local-data/usability-2026-11-04/shots';
+const SHOTS = process.env.IT_SHOT_DIR ?? join(tmpdir(), 'relay-integration-shots');
 // Shots once, from the 1.0 run.
 const TAKE_SHOTS = process.env.IT_ENT_SERVER === '1.0';
 

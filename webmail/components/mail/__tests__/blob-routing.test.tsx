@@ -398,7 +398,7 @@ describe('standard mail UI blob routing', () => {
   it('exports the raw shared message through its owner', async () => {
     render(<MailApp />);
     await exportEmail();
-    expect(primary.downloadBlob).toHaveBeenCalledWith('raw-blob', expect.stringMatching(/\.eml$/), 'message/rfc822', 'nrichmond', { kind: 'export' });
+    await waitFor(() => expect(primary.downloadBlob).toHaveBeenCalledWith('raw-blob', expect.stringMatching(/\.eml$/), 'message/rfc822', 'nrichmond', { kind: 'export' }));
   });
 
   it.each([false, true])('routes Unified selection (automatic=%s) after Email/get replaces the stub', async (automatic) => {
@@ -411,7 +411,9 @@ describe('standard mail UI blob routing', () => {
     await downloadAttachment();
     await exportEmail();
     expect(other.downloadBlob).toHaveBeenCalledWith('same-blob', expect.any(String), 'message/rfc822', 'nrichmond');
-    expect(other.downloadBlob).toHaveBeenCalledWith('raw-blob', expect.any(String), 'message/rfc822', 'nrichmond', { kind: 'export' });
+    // The export handler is fire-and-forget from the menu click, so the
+    // downloadBlob call lands a few microtasks after the click returns.
+    await waitFor(() => expect(other.downloadBlob).toHaveBeenCalledWith('raw-blob', expect.any(String), 'message/rfc822', 'nrichmond', { kind: 'export' }));
     expect(primary.downloadBlob).not.toHaveBeenCalled();
     expect(useEmailStore.getState().selectedEmail).toMatchObject({ sourceClientAccountId: 'login-other', sourceAccountId: 'nrichmond', accountLabel: 'Richmond' });
   });

@@ -21,7 +21,7 @@ import {
  * under "Assigned to me" and marks it done, which takes it out of "Open".
  * carol, who is in no group, and alice's own mailbox get no team actions.
  *
- * IT_TEAM_INBOX_ZIP names the zip (default: the plugins worktree's build).
+ * IT_TEAM_INBOX_ZIP names the built plugin zip; the spec skips without it.
  * The test messages are created in the group's Inbox over JMAP and
  * destroyed at the end, keywords and all; the plugin is removed and the
  * policy put back.
@@ -29,7 +29,7 @@ import {
 
 test.describe.configure({ mode: 'serial', timeout: 240000 });
 
-const ZIP = process.env.IT_TEAM_INBOX_ZIP ?? 'C:/Users/info/worktrees/plugins-org-teaminbox/team-inbox/team-inbox.zip';
+const ZIP = process.env.IT_TEAM_INBOX_ZIP ?? '';
 const RUN = Date.now().toString(36);
 const SELF = `Team inbox bob takes it ${RUN}`;
 const FOR_BOB = `Team inbox for bob ${RUN}`;
