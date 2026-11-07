@@ -109,8 +109,10 @@ Open items, all of which need evidence rather than assumption:
   published on the server's own registrable domain, so a second hostname needs checking against it.
   Still operator action; `admin.shopstatesideglobal.com/api/schema` did answer 401, which shows the
   API is reachable there.
-- CORS and `X-Forwarded-Proto` behavior on the new hostname. The proto patch already landed. CORS
-  matters for the webmail origin, not for a same-origin admin panel.
+- CORS and `X-Forwarded-Proto` behavior on the new hostname. The proto patch already landed. CORS is
+  one server boolean, `Http.usePermissiveCors`, not an origin list; it is currently **off** in
+  production, verified by a `/jmap` preflight that returns 204 with no CORS headers. Turn it on
+  before the webmail deploy, per `DEPLOY.md` step 10.
 - A smoke-test script that exercises create, read, update, delete against a throwaway account.
   Written as `scripts/api-smoke.sh`; **not yet run**, it needs an API key.
 - Enable the Prometheus exporter, or the Overview page stays on its setup note. See the log entry.
@@ -285,6 +287,26 @@ no upstream branding. Revisit if we ever write our own docs.
 
 ## Log
 
+- 2026-11-08: The CORS instruction every doc gave was wrong, and is corrected. The deploy steps and
+  four READMEs told the operator to add the webmail origin under "Settings > HTTP > CORS allowed
+  origins". No such list exists in this build. What exists is one boolean, `usePermissiveCors`, on
+  the `Http` singleton (`server/crates/registry/src/schema/structs.rs:3334`); on, it appends
+  `Access-Control-Allow-Origin: *` and a fixed header/method list to every HTTP response
+  (`server/crates/common/src/config/network.rs:448`), and off, `/jmap` answers the preflight with a
+  bare 204 and no CORS headers, which is what production does today. The reason discovery looked
+  fine is that `.well-known`, the OAuth routes and autodiscover call `with_cors_unrestricted()`
+  whatever the switch says (`crates/http/src/request.rs:460`, `:485`, `:490`, `:855`), so a
+  `.well-known` preflight passing proves nothing about `/jmap`. `*` rather than a pinned origin is
+  acceptable here because the client never sends credentials cross-origin
+  (`webmail/lib/jmap/client.ts:303` picks `'omit'` or leaves the fetch default), so a third-party
+  page has no session to ride. The alternative was adding the headers at Coolify's proxy, which the
+  switch makes unnecessary. Corrected in `DEPLOY.md` step 10 and its troubleshooting entry,
+  `README.md`, `server/README.md`, `webmail/README.md`, `docs/API.md` and the comment in
+  `docker-compose.yml`. Also checked, and corrected in the same pass: there is no REST route for
+  writing settings at all, only `/api/auth`, `/api/account`, `/api/schema`, `/api/token/*` and
+  `/api/live/*` (`server/api/v1/openapi.yml`), so a doc draft of mine that offered
+  `PUT /api/settings` was deleted rather than shipped. Operator action: turn the switch on in the
+  admin panel, then confirm with the curl in step 10 before signing in.
 - 2026-11-07: The 8 carried webmail failures diagnosed and fixed. Each was first reproduced in a
   one-file run, so none is blamed on machine load without evidence. None of the eight is a product
   defect; all of them are in the tests or in the paths the tests reach for.

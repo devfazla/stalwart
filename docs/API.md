@@ -168,12 +168,22 @@ eventually be throttled.
 
 For a server-to-server script, skip this section: there is no origin, so there is no CORS.
 
-For the admin UI on a different hostname, the browser needs the API host to send CORS
-headers for that origin, and the OAuth client has to be registered so that its redirect
-origins match. The relevant server settings are the HTTP CORS list and the `Oauth::Client`
-objects; the discovery documents are served at
-`.well-known/oauth-authorization-server` and `.well-known/openid-configuration`
-(`server/crates/http/src/request.rs:382`, `:406`).
+For the webmail on a different hostname, the browser needs the API host to send CORS
+headers. Stalwart has no allowlist of origins: the setting is the single boolean
+`usePermissiveCors` on the `Http` singleton (`server/crates/registry/src/schema/structs.rs:3334`),
+and when it is on every response carries `Access-Control-Allow-Origin: *` plus a fixed
+header and method list (`server/crates/common/src/config/network.rs:448`). `*` is safe in
+this design because the webmail client sends no credentials cross-origin
+(`webmail/lib/jmap/client.ts:303`).
+
+The discovery documents are served at `.well-known/oauth-authorization-server` and
+`.well-known/openid-configuration`, and those, the OAuth endpoints and the autodiscover
+routes answer preflights with permissive CORS even with the global switch off
+(`server/crates/http/src/request.rs:460`, `:485`, `:490`, `:855`,
+`auth/oauth/auth.rs:514`, `:539`, `openid.rs:142`). That is why `curl -X OPTIONS
+https://mail.example.com/jmap` returning no CORS headers does not contradict a
+`.well-known` preflight that has them. For the OAuth client itself, register it so its
+redirect origins match (`Oauth::Client` objects).
 
 The OAuth endpoints themselves are `authorize`, `token`, `device`, `revoke` and
 `registration`, implemented under `server/crates/http/src/auth/oauth/`. The token endpoint

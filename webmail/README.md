@@ -27,7 +27,7 @@ including the ones this deployment pins:
 
 | Variable | Why it is set here |
 |---|---|
-| `JMAP_SERVER_URL` | The mail server the browser talks to. Must be its public URL, and Stalwart must allow this origin under Settings → HTTP → CORS allowed origins. |
+| `JMAP_SERVER_URL` | The mail server the browser talks to. Must be its public URL, and Stalwart must have `usePermissiveCors` turned on (deploy step 10) or the browser blocks every JMAP call. |
 | `NO_THIRD_PARTY_TRAFFIC` | `true`. Fences telemetry, the update check, the push relay, the extension directory and the icon/translation proxies. Pinned in the environment it cannot be re-opened from the admin panel. |
 | `BULWARK_TELEMETRY` | `off`. Locks the heartbeat and hides the admin toggle. |
 | `BULWARK_UPDATE_CHECK` | `off`. No version probe, no "update available" banner. |

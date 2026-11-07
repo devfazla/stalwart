@@ -75,9 +75,10 @@ for what each license does and does not allow when you rebrand or extend a fork.
 ## Webmail build & wiring
 
 `webmail/` is a standalone Next.js app. The browser talks JMAP to the mail server
-directly, the webmail container does not proxy it, so Stalwart must list the
-webmail origin under Settings → HTTP → CORS allowed origins, and `JMAP_SERVER_URL`
-must be that same public URL.
+directly, the webmail container does not proxy it, so Stalwart must send CORS
+headers on `/jmap`. The switch is the `Http.usePermissiveCors` boolean, not an
+origin list (see [DEPLOY.md](DEPLOY.md) step 10), and `JMAP_SERVER_URL` must be
+that same public URL.
 
 ```sh
 cd webmail

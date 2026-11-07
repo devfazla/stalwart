@@ -26,8 +26,9 @@ disk. The CI image build is the reliable path.
 
 `../docker-compose.yml` is one deployment with two services. This directory's binary is
 what the `stalwart` service runs; `../webui/` is the admin panel it serves at `/admin`,
-and `../webmail/` is the mail client on its own container. The server must list the
-webmail origin under Settings → HTTP → CORS allowed origins for the client to reach JMAP.
+and `../webmail/` is the mail client on its own container. The client reaches JMAP from
+the browser, so the server needs `usePermissiveCors` on the `Http` settings object
+(see [../DEPLOY.md](../DEPLOY.md) step 10).
 
 [../DEPLOY.md](../DEPLOY.md) has the step-by-step deployment guide and
 [../docs/API.md](../docs/API.md) the mailbox management API.

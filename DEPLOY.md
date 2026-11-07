@@ -96,11 +96,35 @@ heavy work runs on GitHub's free runners instead of on your box.
 9. Open your mail domain → Stalwart runs its **first-boot setup wizard** (bootstrap
    mode, port 8080). Create the admin account; keep the default local data store
    (SQLite/RocksDB paths inside the `/var/lib/stalwart` volume) for a single node.
-10. **Let the webmail talk to the server**: in the admin UI, add the webmail
-    origin under Settings → HTTP → CORS allowed origins
-    (`https://webmail.example.com`). Without it the browser blocks every JMAP
-    call and sign-in fails, because the webmail client talks to JMAP *directly*, it
-    is not proxied through the webmail container.
+10. **Let the webmail talk to the server**: turn on the server's permissive CORS
+    switch. Stalwart has no CORS *allowlist*, only one boolean, `usePermissiveCors`
+    on the `Http` singleton settings object (`server/crates/registry/src/schema/structs.rs:3334`).
+    When it is on, every HTTP response carries
+    `Access-Control-Allow-Origin: *` with a fixed header/method list
+    (`server/crates/common/src/config/network.rs:448`). It should be on the same admin
+    page as *Client IP source*, since the settings forms are generated from the schema;
+    look for a CORS or "permissive" toggle, not a list of origins.
+
+    Verify before signing in. The discovery endpoints (`/.well-known/…` and the
+    OAuth routes) send `*` unconditionally, so they pass while `/jmap` still fails:
+
+    ```sh
+    curl -si -X OPTIONS https://mail.example.com/jmap \
+      -H 'Origin: https://webmail.example.com' | grep -i access-control
+    ```
+
+    Three header lines mean it is on; no output means the toggle is still off.
+    (If the panel ever hides it, the value is a settings primitive,
+    `{"@type":"update","object":"Http","value":{"usePermissiveCors":true}}`, which
+    `stalwart-cli apply --file` accepts the same way
+    `webmail/integration/stalwart/plan-accounts.ndjson.tpl` sets it. There is no
+    REST route for writing settings; see `server/api/v1/openapi.yml`.)
+
+    `*` is enough here: the webmail client never attaches credentials to a
+    cross-origin JMAP call (`webmail/lib/jmap/client.ts:303`), so there is no
+    cookie for another site to ride along. Without this switch the browser blocks
+    every JMAP call, because the webmail client talks to JMAP directly instead of
+    through the webmail container.
 11. Open the webmail domain and sign in with a mailbox account.
 
 > The server's healthcheck allows a long start period (300 s) so the container
@@ -175,8 +199,8 @@ on the VPS is a workable stopgap if the webmail image has not been published yet
 - **Can receive but not send mail** → outbound port 25 blocked by the provider (see
   Prerequisites) or missing PTR/SPF/DKIM.
 - **Webmail sign-in fails with a CORS or network error in the browser console** →
-  the webmail origin is not in Stalwart's CORS allowed origins (deploy step 10),
-  or `JMAP_SERVER_URL` points at a host the browser cannot reach.
+  `Http.usePermissiveCors` is off on the server (deploy step 10), or `JMAP_SERVER_URL`
+  points at a host the browser cannot reach. The curl in step 10 tells you which.
 - **Webmail `ghcr.io/devfazla/relay-webmail:main` does not exist yet** → the
   webmail job only runs on a push that touches `webmail/`. Push, wait for
   "Build webmail image" to go green, or use the commented `build:` block to build
