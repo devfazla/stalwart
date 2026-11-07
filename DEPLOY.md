@@ -96,14 +96,16 @@ heavy work runs on GitHub's free runners instead of on your box.
 9. Open your mail domain → Stalwart runs its **first-boot setup wizard** (bootstrap
    mode, port 8080). Create the admin account; keep the default local data store
    (SQLite/RocksDB paths inside the `/var/lib/stalwart` volume) for a single node.
-10. **Let the webmail talk to the server**: turn on the server's permissive CORS
-    switch. Stalwart has no CORS *allowlist*, only one boolean, `usePermissiveCors`
-    on the `Http` singleton settings object (`server/crates/registry/src/schema/structs.rs:3334`).
-    When it is on, every HTTP response carries
-    `Access-Control-Allow-Origin: *` with a fixed header/method list
-    (`server/crates/common/src/config/network.rs:448`). It should be on the same admin
-    page as *Client IP source*, since the settings forms are generated from the schema;
-    look for a CORS or "permissive" toggle, not a list of origins.
+10. **Let the webmail talk to the server**: turn on the permissive CORS switch.
+    Stalwart has no CORS *allowlist*, only one boolean, `usePermissiveCors`
+    (`server/crates/registry/src/schema/structs.rs:3334`). When it is on, every HTTP
+    response carries `Access-Control-Allow-Origin: *` with a fixed header/method list
+    (`server/crates/common/src/config/network.rs:448`).
+
+    Click path in the admin panel: **Network → HTTP → Security**, then flip
+    *Permissive CORS policy* on the right and press **Save**. It is under HTTP Security,
+    not the HTTP General page that holds *Client IP source*, and the description reads
+    "allow all origins", which is why searching for an origin list finds nothing.
 
     Verify before signing in. The discovery endpoints (`/.well-known/…` and the
     OAuth routes) send `*` unconditionally, so they pass while `/jmap` still fails:
@@ -114,7 +116,7 @@ heavy work runs on GitHub's free runners instead of on your box.
     ```
 
     Three header lines mean it is on; no output means the toggle is still off.
-    (If the panel ever hides it, the value is a settings primitive,
+    (The same value is a settings primitive,
     `{"@type":"update","object":"Http","value":{"usePermissiveCors":true}}`, which
     `stalwart-cli apply --file` accepts the same way
     `webmail/integration/stalwart/plan-accounts.ndjson.tpl` sets it. There is no

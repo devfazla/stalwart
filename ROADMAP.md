@@ -305,8 +305,11 @@ no upstream branding. Revisit if we ever write our own docs.
   `docker-compose.yml`. Also checked, and corrected in the same pass: there is no REST route for
   writing settings at all, only `/api/auth`, `/api/account`, `/api/schema`, `/api/token/*` and
   `/api/live/*` (`server/api/v1/openapi.yml`), so a doc draft of mine that offered
-  `PUT /api/settings` was deleted rather than shipped. Operator action: turn the switch on in the
-  admin panel, then confirm with the curl in step 10 before signing in.
+  `PUT /api/settings` was deleted rather than shipped. Operator action: the panel does render it,
+  as *Permissive CORS policy* under Network → HTTP → Security (not the HTTP General page that holds
+  *Client IP source*), and its description says "allow all origins", which is why an operator
+  looking for an origin list never finds this toggle. Flip it, then confirm with the curl in step 10
+  before signing in.
 - 2026-11-07: The 8 carried webmail failures diagnosed and fixed. Each was first reproduced in a
   one-file run, so none is blamed on machine load without evidence. None of the eight is a product
   defect; all of them are in the tests or in the paths the tests reach for.
