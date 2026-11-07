@@ -34,10 +34,11 @@ describe('build id', () => {
   });
 
   it('gets one seed per workflow run in every image build', () => {
+    // This project is a subdirectory of a monorepo: CI lives at the repo root.
     const root = join(__dirname, '..', '..');
     expect(readFileSync(join(root, 'Dockerfile'), 'utf-8')).toMatch(/ARG BULWARK_BUILD_SEED=\s+ENV BULWARK_BUILD_SEED=\$BULWARK_BUILD_SEED/);
-    for (const workflow of ['docker-publish.yml', 'docker-publish-releases.yml']) {
-      const text = readFileSync(join(root, '.github', 'workflows', workflow), 'utf-8');
+    for (const workflow of ['docker-image-webmail.yml']) {
+      const text = readFileSync(join(root, '..', '.github', 'workflows', workflow), 'utf-8');
       const builds = text.split('build-args: |').length - 1;
       const seeded = text.split('BULWARK_BUILD_SEED=${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}').length - 1;
       expect(builds, workflow).toBeGreaterThan(0);

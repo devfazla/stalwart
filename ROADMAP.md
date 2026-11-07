@@ -215,8 +215,8 @@ in the environment (`third-party-mode.ts:9-11`).
 | Outbound host | Feature | State in our deploy |
 |---|---|---|
 | `telemetry.bulwarkmail.org` | instance heartbeat and crash reports | double-closed: `BULWARK_TELEMETRY=off` locks it, and the mode blocks the host anyway |
-| `version.telemetry.bulwarkmail.org` | "update available" banner | `BULWARK_UPDATE_CHECK=off`; the check also needs an explicit `BULWARK_UPDATE_CHECK_URL` before it ever runs (`lib/version-check/state.ts:94`) |
-| `notifications.relay.bulwarkmail.org` | web push relay | removed the default: `DEFAULT_RELAY_BASE_URL` is now empty (`lib/push-relays.ts:12`), so the feature is off until an operator names a relay |
+| `version.telemetry.bulwarkmail.org` | "update available" banner | `BULWARK_UPDATE_CHECK=off` disables the check outright (`lib/version-check/state.ts:79`); the mode refuses it too |
+| `notifications.relay.bulwarkmail.org` | web push relay | blocked by the mode, which drops the built-in relay from the list the user can pick (`lib/push-relays.ts`); push works only with a relay an admin adds |
 | `extensions.bulwarkmail.org` | admin marketplace directory | blocked by the mode; still the value of `OFFICIAL_DIRECTORY` (`lib/admin/directory-keys.ts:19`) because that string also validates signed plugin statements, and inventing our own would break verification without a directory we run |
 | `connector.bulwarkmail.org` | connector docs and extension links | blocked by the mode |
 | `icons.duckduckgo.com` | sender favicon fallback | blocked by the mode |
@@ -285,6 +285,39 @@ no upstream branding. Revisit if we ever write our own docs.
 
 ## Log
 
+- 2026-11-07: The webmail suite measured against the vendor commit, and the 56 regressions the
+  rebrand caused are gone. Method: `git worktree add` at `691d1a4` with `node_modules` junctioned
+  in, then the same file list on both trees. Of the 34 files failing on `HEAD`, 10 (53 tests) fail
+  identically at the vendor commit, so 24 files and 56 tests were ours.
+  Cause, for all but two: behaviour, not branding. An earlier pass emptied the compiled defaults of
+  every outbound feature (telemetry collector, version-check endpoint, built-in push relay,
+  marketplace directory, favicon upstream, BIMI, public translation) and added a consent gate on the
+  login ledger plus a mandatory relay URL in the dev JMAP mock. 54 of those tests specify the
+  defaults rather than the fence, and `lib/__tests__/outgoing-hosts-mode.test.ts` already proves the
+  mode refuses each host one at a time, so the constants bought nothing our compose file does not
+  already guarantee. Reverted. What a deployment without `NO_THIRD_PARTY_TRAFFIC=true` does is now
+  written down in the README instead of being hidden by an empty string.
+  Kept, because it is branding: the three outbound `User-Agent` strings say Relay Mail and carry no
+  URL (and the two files they left are dropped from the host allowlist whose job is to notice an
+  unregistered literal); the Sieve `managed outside Relay Mail` header, whose round-trip test still
+  counted only the old spelling; `Mail` joins the proper nouns in the sentence-case guard, since the
+  Settings title is now two words like the `Bulwark Webmail` it replaces; and the settings-search
+  check asks that the browser-only push row stay out of the desktop app rather than that "relay"
+  match nothing, which it cannot now that the product is called Relay Mail.
+  Fixed on top of the baseline, in code rather than by skipping: `desktop-host.test.tsx` mocked
+  `@/lib/device-policy` without `canExportAnywhere`, which failed all 39 of its tests on any machine;
+  `el` and `nn` were 14 keys short each (`compose_dock.*` and the whole `desktopSaveOpen` block) and
+  have them translated; and `.github/workflows/docker-image-webmail.yml` never passed
+  `BULWARK_BUILD_SEED`, so our amd64 and arm64 images were built with different build ids, which is
+  exactly the load-balancer bug the two tests that read upstream's unvendored `.github/` were
+  written to catch. Both tests now read our workflow, and the seed is per run.
+  Result: `npx vitest run --silent` on `webmail/` gives 2055 files passed, 5 failed, 2 skipped;
+  21828 tests passed, 8 failed, 15 skipped. The 8 all fail at the vendor commit too, so they are
+  carried rather than caused: `blob-routing` (3) exports the attachment blob where the test wants the
+  raw one, `push-preview-route` (3) times out at 5 s and resolves the primary account where a shared
+  one is asked for, `health-route` (1) trips its own wording guard because this machine reports 170%
+  of the V8 heap limit, and `telemetry-desktop` (1) looks for a desktop-app collector path on the
+  host, which `it.skipIf(process.env.CI)` skips in CI.
 - 2026-11-07: Ownership and contact claims removed from the policy docs. Deleted
   `server/AGENTS.md` (it instructed AI agents to route bugs to `support.stalw.art`, refuse
   pull requests and not file advisories, which is upstream's policy applied to our repo),
@@ -335,9 +368,10 @@ no upstream branding. Revisit if we ever write our own docs.
   `ACCESSIBILITY.md` links repointed. The login page's GitHub star fetch and the
   `X-Powered-By: bulwarkmail.org` header were already gone, but the header test still asserted
   the removed value and was failing; it now asserts the header is absent.
-  Verified: `npx vitest run` in `webmail/` passed 4363 tests with 0 failures. Not verified: the
-  Next.js typecheck still cannot run in this environment (it is OOM-killed), so the asset
-  renames are covered by tests and grep, not by `tsc`.
+  Verified: ~~`npx vitest run` in `webmail/` passed 4363 tests with 0 failures~~. That number came
+  from a scoped run and was wrong; see the 2026-11-07 suite entry below for what was actually
+  measured. Not verified at the time: the Next.js typecheck could not run (it is OOM-killed when
+  anything else is on the machine), so the asset renames were covered by tests and grep, not `tsc`.
 
 - 2026-11-07: `docker-compose.yml` gained the `webmail` service, resolving the conflict analysis
   point by point. One resource, two services, so a deploy can never start a second RocksDB writer.

@@ -253,6 +253,9 @@ describe('build wiring', () => {
       /next build --webpack[\s\S]{0,40}node scripts\/standalone-guard\.mjs/,
     );
     expect(readFileSync(path.join(ROOT, '.dockerignore'), 'utf8')).toContain('!scripts/standalone-guard.mjs');
-    expect(readFileSync(path.join(ROOT, '.github/workflows/standalone-release.yml'), 'utf8')).toMatch(/run: npm run build/);
+    // This project ships from the monorepo's image workflow, which builds the
+    // Dockerfile above; there is no separate standalone release workflow here.
+    const workflow = readFileSync(path.join(ROOT, '..', '.github', 'workflows', 'docker-image-webmail.yml'), 'utf8');
+    expect(workflow).toMatch(/context: \.\/webmail/);
   });
 });
