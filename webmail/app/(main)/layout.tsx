@@ -22,6 +22,7 @@ import { IS_LITE, LITE_MOUNT_GLOBAL } from "@/lib/lite";
 import { accessibilityBootScript } from "@/lib/accessibility-settings";
 import { bootSkeletonScript } from "@/lib/boot-skeleton/boot-script";
 import { WindowControlsHost } from "@/components/layout/window-controls-host";
+import { NavigationProgress } from "@/components/layout/navigation-progress";
 import "../globals.css";
 import "../print.css";
 import "../desktop.css";
@@ -342,6 +343,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${hankenGrotesk.variable} antialiased`}
       >
         <ServiceWorkerRegistration />
+        <NavigationProgress />
         <WindowControlsHost />
         {!themeColorConfigured && <ThemeColorSync />}
         <FaviconBadge />

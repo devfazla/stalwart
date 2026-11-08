@@ -293,6 +293,22 @@ no upstream branding. Revisit if we ever write our own docs.
 
 ## Log
 
+- 2026-11-08: Added a top navigation progress bar so page switches feel native. The webmail gave no
+  loading feedback when moving between Mail, Calendar, Contacts, Files and Settings (real route
+  transitions) or between admin pages (route-less `history.pushState` switches). New client component
+  `webmail/components/layout/navigation-progress.tsx`, mounted in the root layout
+  (`webmail/app/(main)/layout.tsx`), pins a 3px bar to the very top of the viewport in the brand
+  palette (`--color-primary` → `--color-unread`, with a soft glow), aria-hidden and pointer-events
+  none. It starts on a capture-phase click into an internal same-origin anchor (early, before the RSC
+  fetch), on popstate, and on a patched `history.pushState`/`replaceState` (covers `navigateAdmin` and
+  `router.push`); it trickles while pending, completes to 100% once the new pathname paints (double
+  rAF) with a 300ms minimum on-screen time, then fades. Ignores modifier/external/download/hash-only
+  clicks and same-URL history bookkeeping, restores the original history methods on unmount, has an
+  8s safety timeout, and skips the trickle under reduced motion (`data-motion` / OS preference). No
+  new dependency. Verified: 10 unit tests, 71 layout/boot-import tests and a full typecheck pass; in a
+  browser against the dev mock server, Mail→Calendar and Calendar→Contacts each recorded the bar at
+  opacity 1 trickling 8→32%, completing to 100%, and fading to hidden, with no errors attributable to
+  it.
 - 2026-11-08: Source code offer removed from the webmail everywhere, by operator decision, for a
   non-technical end user. Deleted the About card link and its `UPSTREAM_SOURCE_URL` fallback
   (`components/settings/about-data-settings.tsx`), the matching skeleton line
