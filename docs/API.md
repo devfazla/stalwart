@@ -19,9 +19,12 @@ Mailbox CRUD is a JMAP call. There is no REST resource for accounts.
 | Prometheus text export | `GET /api/metrics/prometheus` | `server/crates/http/src/request.rs:720-745` |
 
 The JMAP type name for a mailbox is `Account`
-(`server/crates/registry/src/schema/properties_impl.rs:271`), so the method names are
-`Account/get`, `Account/set`, `Domain/get`, `Domain/set` and so on. The admin panel uses
-exactly these; it builds them from the same schema this document describes.
+(`server/crates/registry/src/schema/properties_impl.rs:271`). Management methods carry a
+mandatory `x:` prefix: the wire names are `x:Account/get`, `x:Account/set`, `x:Domain/get`,
+`x:Domain/set`, `x:ApiKey/set`. The server formats every registry method as `x:{object}/{fn}`
+(`server/crates/jmap-proto/src/request/method.rs:250-252`), and the admin UI builds them the
+same way (`webui/src/services/jmap/client.ts:189`). A bare `Account/set` without the `x:`
+is not a management call and will not do what you want.
 
 Because the admin UI is served by the same binary that serves `/jmap`, a script aimed at
 `https://admin.shopstatesideglobal.com/jmap` is same-origin with the UI and needs no CORS
@@ -69,7 +72,7 @@ One JMAP request per HTTP request. The body is a `methodCalls` array of
 {
   "using": ["urn:ietf:params:jmap:core"],
   "methodCalls": [
-    ["Account/get", { "accountId": "management", "ids": null }, "c0"]
+    ["x:Account/get", { "accountId": "<management account id>", "ids": null }, "c0"]
   ]
 }
 ```
@@ -79,26 +82,43 @@ the authenticated principal, so pass the id from your session document.
 
 ### Create
 
+An account is one primary domain plus optional aliases. The discriminator is `@type: "User"`
+(the `x:Account` schema has `User` and `Group` variants). `name` is the local part, `domainId`
+is the id of an **existing** `x:Domain` object, and the address `name@domain` is derived by the
+server (`emailAddress` is `serverSet`, do not send it). The initial password goes in
+`credentials` as a `Password` variant. There is no `emails`, `secrets` or `quota` field:
+cross-domain addresses are `aliases`, and size limits are `quotas`.
+
 ```jsonc
 {
   "using": ["urn:ietf:params:jmap:core"],
   "methodCalls": [
-    ["Account/set", {
-      "accountId": "management",
+    ["x:Account/set", {
+      "accountId": "<management account id>",
       "create": {
         "new-mailbox": {
-          "type": "individual",
+          "@type": "User",
           "name": "jane",
-          "secrets": ["correct horse battery staple"],
-          "emails": ["jane@mail.shopstatesideglobal.com"],
-          "quota": 10737418240,
-          "roles": ["user"]
+          "domainId": "<id of an existing Domain>",
+          "description": "Jane Doe",
+          "credentials": [
+            { "@type": "Password", "secret": "correct horse battery staple" }
+          ],
+          "aliases": [
+            { "name": "jane", "domainId": "<id of another Domain>", "enable": true }
+          ],
+          "roles": { "@type": "User" }
         }
       }
     }, "c0"]
   ]
 }
 ```
+
+The domain must exist first: create it with `x:Domain/set` (`create: { "d1": { "name":
+"example.com" } }`) and use the returned id as `domainId`. Each alias carries its own
+`domainId`, so one account can hold addresses across several domains
+(`server/crates/registry/src/schema/structs.rs:3084-3090`, `:6704-6723`).
 
 The property names are whatever the schema reports, not what this file says. Read them
 from `GET /api/schema` before you hard-code anything: the set of fields differs between
@@ -107,15 +127,16 @@ rather than being ignored.
 
 ### Update
 
-`update` maps an existing object id to a patch of changed properties only.
+`x:Account/set` `update` maps an existing object id to a patch of changed properties only.
 
 ### Delete
 
-`destroy` takes an array of ids. It is not reversible and it removes the mailbox data.
+`x:Account/set` `destroy` takes an array of ids. It is not reversible and it removes the
+mailbox data.
 
 ### Reading back
 
-Use `Account/get` with `"ids": null` for everything the token may see, or a specific list.
+Use `x:Account/get` with `"ids": null` for everything the token may see, or a specific list.
 
 ## 4. Partial failure
 
@@ -124,8 +145,12 @@ A single call can create three mailboxes and fail on the fourth. The response is
 
 - `created` / `updated` / `destroyed` keyed by the call-local id or object id
 - `notCreated` / `notUpdated` / `notDestroyed`, each value a JMAP error object with a
-  `type` such as `invalidProperties`, `alreadyExists`, `forbidden`, `notFound`, and a
-  `properties` map naming the offending field
+  `type` and a `properties` map naming the offending field. For accounts the common types
+  are `validationFailed` (missing `name` or `domainId`), `invalidForeignKey` (the `domainId`
+  does not name an existing Domain), and `primaryKeyViolation` (an account with that
+  `name` already exists in that domain). Note it is `primaryKeyViolation` here, not the
+  `alreadyExists` you may know from mail JMAP
+  (`server/crates/jmap/src/registry/set.rs:1193-1208`).
 
 Treat `notCreated` on an id you asked for as a hard failure. Never assume a `200` means
 the change happened.
@@ -228,11 +253,30 @@ AUTH="$(printf '%s' 'relay-admin:<api-key>' | base64 -w0)"
 curl -sS -X POST "$API/jmap" \
   -H "Authorization: Basic $AUTH" \
   -H 'Content-Type: application/json' \
-  -d '{"using":["urn:ietf:params:jmap:core"],"methodCalls":[["Domain/get",{"accountId":"relay-admin","ids":null},"c0"]]}'
+  -d '{"using":["urn:ietf:params:jmap:core"],"methodCalls":[["x:Domain/get",{"accountId":"relay-admin","ids":null},"c0"]]}'
 ```
 
 `scripts/api-smoke.sh` wraps this sequence (create, read, update, rotate secret, delete)
 with assertions and cleanup, and prints one PASS or FAIL line per step.
+
+## 7a. Where to get an API key
+
+API keys are a credential on an account, managed in the admin panel
+(`server/resources/schema/schema_oss.json.gz`, list `x:ApiKey`, "Manage API keys for
+programmatic access"):
+
+- For the account you are signed in as: the top-level **Account** section, then
+  **Credentials**, then **API Keys**, then Create. Siblings are Password, App Passwords and
+  Connected Applications.
+- For any user as an admin: **Management** then **Directory** then **Accounts**, open the
+  user, and in the **Authentication** section use the **Credentials** field. The credential
+  variant labelled "API key for programmatic access" is the API key.
+
+On create you set a description, optional expiry, allowed IPs and the permissions the key
+carries; the secret is generated by the server and shown once (`secret` is `serverSet`,
+`server/crates/jmap/src/registry/mapping/account.rs:490-516`). Grant the key the
+`sysAccount*` permissions from section 2 (plus `sysDomainQuery`) so it can manage mailboxes.
+The same object is reachable over the wire as `x:ApiKey/set` for programmatic creation.
 
 ## 8. What has been checked against the live server
 
