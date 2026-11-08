@@ -115,7 +115,9 @@ heavy work runs on GitHub's free runners instead of on your box.
       -H 'Origin: https://webmail.example.com' | grep -i access-control
     ```
 
-    Three header lines mean it is on; no output means the toggle is still off.
+    Three header lines mean it is on; no output means the toggle is still off. Give
+    the server a few seconds after Save, it rebuilds its HTTP config on a short
+    interval, so an empty result immediately after the flip is not proof it failed.
     (The same value is a settings primitive,
     `{"@type":"update","object":"Http","value":{"usePermissiveCors":true}}`, which
     `stalwart-cli apply --file` accepts the same way
