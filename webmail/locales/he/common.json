@@ -2687,8 +2687,7 @@
         "button": "ייבוא"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "קוד מקור"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

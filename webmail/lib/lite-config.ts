@@ -99,7 +99,6 @@ export function applyLiteConfig(raw: unknown, defaults?: { jmapServerUrl?: strin
     jmapServerAutoPickByDomain: bool(input.jmapServerAutoPickByDomain, false),
     embeddedMode: bool(input.embeddedMode, false),
     parentOrigin: str(input.parentOrigin, ''),
-    sourceCodeUrl: httpUrlOrEmpty(input.sourceCodeUrl),
     accessibilityStatementUrl: httpUrlOrEmpty(input.accessibilityStatementUrl),
     accessibilityFeedbackUrl: httpOrMailtoOrEmpty(input.accessibilityFeedbackUrl),
     helpUrl: httpUrlOrEmpty(input.helpUrl),

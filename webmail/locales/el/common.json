@@ -2759,8 +2759,7 @@
         "button": "Εισαγωγή"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Πηγαίος κώδικας"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Πολιορκία ανεπιθύμητων μηνυμάτων",

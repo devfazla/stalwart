@@ -58,7 +58,7 @@ export function AdminSessionLinksSkeleton({ mobile }: { mobile: boolean }) {
   );
 }
 
-/** The about card at the foot of the list (AboutFooter): logo, name and version, source link. */
+/** The about card at the foot of the list (AboutFooter): logo, name and version. */
 function AboutFooterSkeleton() {
   return (
     <div aria-hidden="true" className="px-3 py-2">
@@ -70,7 +70,6 @@ function AboutFooterSkeleton() {
             <TextLine className="text-[0.6875rem]" w="7rem" />
           </div>
         </div>
-        <TextLine className="shrink-0 text-[0.6875rem] w-12" w="100%" />
       </div>
     </div>
   );

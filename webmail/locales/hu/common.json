@@ -2749,8 +2749,7 @@
         "button": "Importálás"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Forráskód"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

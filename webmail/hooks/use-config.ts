@@ -51,7 +51,6 @@ export interface ConfigData {
   jmapServerAutoPickByDomain: boolean;
   embeddedMode: boolean;
   parentOrigin: string;
-  sourceCodeUrl: string;
   /** Accessibility and help links (lib/help-links.ts); '' hides a link. */
   accessibilityStatementUrl: string;
   accessibilityFeedbackUrl: string;
@@ -212,7 +211,6 @@ export function useConfig(): AppConfig {
     jmapServerAutoPickByDomain: configCache?.jmapServerAutoPickByDomain || false,
     embeddedMode: configCache?.embeddedMode || false,
     parentOrigin: configCache?.parentOrigin || '',
-    sourceCodeUrl: configCache?.sourceCodeUrl || '',
     accessibilityStatementUrl: configCache?.accessibilityStatementUrl || '',
     accessibilityFeedbackUrl: configCache?.accessibilityFeedbackUrl || '',
     helpUrl: configCache?.helpUrl || '',
@@ -267,7 +265,6 @@ export function useConfig(): AppConfig {
         jmapServerAutoPickByDomain: configCache.jmapServerAutoPickByDomain || false,
         embeddedMode: configCache.embeddedMode,
         parentOrigin: configCache.parentOrigin,
-        sourceCodeUrl: configCache.sourceCodeUrl,
         accessibilityStatementUrl: configCache.accessibilityStatementUrl,
         accessibilityFeedbackUrl: configCache.accessibilityFeedbackUrl,
         helpUrl: configCache.helpUrl,
@@ -323,7 +320,6 @@ export function useConfig(): AppConfig {
           jmapServerAutoPickByDomain: data.jmapServerAutoPickByDomain || false,
           embeddedMode: data.embeddedMode,
           parentOrigin: data.parentOrigin,
-          sourceCodeUrl: data.sourceCodeUrl,
           accessibilityStatementUrl: data.accessibilityStatementUrl,
           accessibilityFeedbackUrl: data.accessibilityFeedbackUrl,
           helpUrl: data.helpUrl,

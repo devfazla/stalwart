@@ -286,9 +286,6 @@ export const CONFIG_ENV_MAP: Record<string, { envVar: string; fileEnvVar?: strin
   // address format. Empty uses the translation (login.username_placeholder).
   loginUsernamePlaceholder: { envVar: 'LOGIN_USERNAME_PLACEHOLDER', type: 'string', defaultValue: '' },
   // Where users get the source of the build they are running (AGPL-3.0 §13).
-  // Operators of a modified build point it at their fork; the About card then
-  // links there instead of the upstream repository (#1161). Empty = upstream.
-  sourceCodeUrl: { envVar: 'SOURCE_CODE_URL', type: 'url', defaultValue: '' },
   // Accessibility and help links (OP-01; WCAG 3.2.6, BITV 2.0 §4 and §7):
   // shown in the same place on every page, on the login page, in the
   // settings sidebar and in the account menu. Empty hides a link. Only

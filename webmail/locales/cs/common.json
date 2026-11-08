@@ -2746,8 +2746,7 @@
         "button": "Importovat"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Zdrojový kód"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

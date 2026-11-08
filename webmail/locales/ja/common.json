@@ -2746,8 +2746,7 @@
         "button": "インポート"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "ソースコード"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

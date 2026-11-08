@@ -2753,8 +2753,7 @@
         "button": "Importa"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Codi font"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

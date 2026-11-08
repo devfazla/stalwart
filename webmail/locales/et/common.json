@@ -2753,8 +2753,7 @@
         "button": "Impordi"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Lähtekood"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Rämpsposti piiramine",

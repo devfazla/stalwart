@@ -2753,8 +2753,7 @@
         "button": "استيراد"
       },
       "about": {
-        "title": "بريد Relay Mail الإلكتروني",
-        "source_code": "الشيفرة المصدرية"
+        "title": "بريد Relay Mail الإلكتروني"
       },
       "spam_siege": {
         "title": "Spam Siege",

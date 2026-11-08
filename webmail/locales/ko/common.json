@@ -2746,8 +2746,7 @@
         "button": "가져오기"
       },
       "about": {
-        "title": "Relay Mail 정보",
-        "source_code": "소스 코드"
+        "title": "Relay Mail 정보"
       },
       "spam_siege": {
         "title": "Spam Siege",

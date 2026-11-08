@@ -70,13 +70,6 @@ describe('applyLiteConfig (config.json for the static build)', () => {
     expect(applyLiteConfig('garbage').appName).toBe('Webmail');
   });
 
-  it('keeps an http(s) source code URL and drops any other scheme', () => {
-    expect(applyLiteConfig({}).sourceCodeUrl).toBe('');
-    expect(applyLiteConfig({ sourceCodeUrl: 'https://git.example.com/acme/webmail' }).sourceCodeUrl)
-      .toBe('https://git.example.com/acme/webmail');
-    expect(applyLiteConfig({ sourceCodeUrl: 'javascript:alert(1)' }).sourceCodeUrl).toBe('');
-  });
-
   it('reads the accessibility and help links and drops other schemes', () => {
     const config = applyLiteConfig({
       accessibilityStatementUrl: 'https://acme.example/accessibility',

@@ -2755,8 +2755,7 @@
         "button": "Importer"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Kjeldekode"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

@@ -2746,8 +2746,7 @@
         "button": "İçe Aktar"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Kaynak kodu"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

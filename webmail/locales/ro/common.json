@@ -2753,8 +2753,7 @@
         "button": "Import"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Cod sursă"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

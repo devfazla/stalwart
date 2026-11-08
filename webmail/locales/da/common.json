@@ -2749,8 +2749,7 @@
         "button": "Importér"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Kildekode"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

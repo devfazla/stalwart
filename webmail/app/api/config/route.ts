@@ -105,7 +105,6 @@ export async function GET(request: NextRequest) {
       autoSsoEnabled: configManager.get<boolean>('autoSsoEnabled', false),
       embeddedMode: !!allowedFrameAncestors && allowedFrameAncestors !== "'none'",
       parentOrigin: configManager.get<string>('parentOrigin', ''),
-      sourceCodeUrl: httpUrlOrEmpty(configManager.get<string>('sourceCodeUrl', '')),
       // Accessibility and help links, per domain like the legal links.
       accessibilityStatementUrl: httpUrlOrEmpty(branded<string>('accessibilityStatementUrl', '')),
       accessibilityFeedbackUrl: httpOrMailtoOrEmpty(branded<string>('accessibilityFeedbackUrl', '')),

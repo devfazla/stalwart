@@ -100,7 +100,6 @@ services:
       APP_NAME: Relay Mail
       APP_SHORT_NAME: Relay
       LOGIN_COMPANY_NAME: Relay Mail
-      SOURCE_CODE_URL: https://github.com/devfazla/stalwart
 
       # Where the browser (and this container, for sign-in checks) finds the mail
       # server. Must be the public URL: webmail talks JMAP from the browser, so

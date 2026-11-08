@@ -5990,8 +5990,7 @@
         "button": "นำเข้า"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "ซอร์สโค้ด"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

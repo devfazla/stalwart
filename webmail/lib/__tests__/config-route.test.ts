@@ -35,7 +35,7 @@ const MANAGED_ENV = [
   'SESSION_SECRET_FILE', 'SETTINGS_SYNC_ENABLED', 'STALWART_FEATURES', 'DEV_MOCK_JMAP',
   'FAVICON_URL', 'APP_LOGO_LIGHT_URL', 'APP_LOGO_DARK_URL', 'LOGIN_COMPANY_NAME',
   'LOGIN_IMPRINT_URL', 'LOGIN_PRIVACY_POLICY_URL', 'LOGIN_WEBSITE_URL', 'DOMAIN_BRANDING',
-  'JMAP_SERVERS', 'JMAP_SERVER_AUTO_PICK_BY_DOMAIN', 'SOURCE_CODE_URL', 'LOGIN_SHOW_REMEMBER_ME',
+  'JMAP_SERVERS', 'JMAP_SERVER_AUTO_PICK_BY_DOMAIN', 'LOGIN_SHOW_REMEMBER_ME',
   'ACCESSIBILITY_STATEMENT_URL', 'ACCESSIBILITY_FEEDBACK_URL', 'HELP_URL', 'EASY_READ_URL', 'SIGN_LANGUAGE_URL',
   'LOGIN_USERNAME_PLACEHOLDER',
 ] as const;
@@ -110,7 +110,6 @@ describe('config API route', () => {
     expect(config.faviconUrl).toBe('/branding/Relay_Favicon.svg');
     expect(config.appLogoLightUrl).toBe('');
     expect(config.appLogoDarkUrl).toBe('');
-    expect(config.sourceCodeUrl).toBe('');
   });
 
   // The domain lists name every organisation served by this instance.
@@ -171,21 +170,6 @@ describe('config API route', () => {
     vi.stubEnv('LOGIN_USERNAME_PLACEHOLDER', 'max.mustermann@acme.example');
     expect((await getConfig()).loginUsernamePlaceholder).toBe('max.mustermann@acme.example');
   });
-
-  it('publishes the source code URL for the About card (#1161)', async () => {
-    vi.stubEnv('SOURCE_CODE_URL', 'https://git.example.com/acme/webmail/tree/v1.2.3');
-
-    expect((await getConfig()).sourceCodeUrl).toBe('https://git.example.com/acme/webmail/tree/v1.2.3');
-  });
-
-  it.each(['javascript:alert(1)', 'data:text/html,x', '/relative/path', 'not a url'])(
-    'drops a source code URL that is not absolute http(s): %s',
-    async (value) => {
-      vi.stubEnv('SOURCE_CODE_URL', value);
-
-      expect((await getConfig()).sourceCodeUrl).toBe('');
-    },
-  );
 
   it('publishes the accessibility and help links (OP-01)', async () => {
     vi.stubEnv('ACCESSIBILITY_STATEMENT_URL', 'https://acme.com/accessibility');

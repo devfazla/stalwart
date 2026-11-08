@@ -2746,8 +2746,7 @@
         "button": "导入"
       },
       "about": {
-        "title": "Relay Mail 网页邮箱",
-        "source_code": "源代码"
+        "title": "Relay Mail 网页邮箱"
       },
       "spam_siege": {
         "title": "Spam Siege",

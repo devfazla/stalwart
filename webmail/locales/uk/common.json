@@ -2746,8 +2746,7 @@
         "button": "Імпорт"
       },
       "about": {
-        "title": "Оплот веб-пошти",
-        "source_code": "Вихідний код"
+        "title": "Оплот веб-пошти"
       },
       "spam_siege": {
         "title": "Spam Siege",

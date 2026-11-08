@@ -127,6 +127,12 @@ Open items, all of which need evidence rather than assumption:
 - **Bulwark full edition.** A Node.js service, so `webmail/` is vendored source plus a second
   compose service on port 3000, not a static bundle like `webui.zip`. This adds a container, its own
   persistent state, and a second image build to CI.
+- **Remove the Source code link everywhere (2026-11-08).** Operator decision: the webmail is handed
+  to a non-technical end user, so the About card's source offer is gone from the UI, the config
+  plumbing (`SOURCE_CODE_URL` env, `/api/config`, lite config, validation), the boot skeleton and all
+  32 locales. This drops the AGPL-3.0 §13 source-offer affordance from the served UI; the operator
+  was told and accepted that exposure. The repo itself stays published, which is the corresponding
+  source, but the in-product offer no longer points to it.
 
 Naming scope to keep consistent: image `ghcr.io/devfazla/relay`, compose services `relay-server`,
 `relay-webmail`, volumes `relay-config` / `relay-data`.
@@ -287,6 +293,17 @@ no upstream branding. Revisit if we ever write our own docs.
 
 ## Log
 
+- 2026-11-08: Source code offer removed from the webmail everywhere, by operator decision, for a
+  non-technical end user. Deleted the About card link and its `UPSTREAM_SOURCE_URL` fallback
+  (`components/settings/about-data-settings.tsx`), the matching skeleton line
+  (`components/boot-skeleton/admin-skeleton.tsx`), and the whole `sourceCodeUrl` plumbing: the
+  `/api/config` field, the config type/validation/lite-config readers, the admin settings registry
+  entry, `use-config`, the `SOURCE_CODE_URL` env in `docker-compose.yml` and `.env.example`, and the
+  `about.source_code` key in all 32 locales. Tests updated to match. Targeted runs green:
+  config-route/lite-config/placeholder/plain-language (139 tests) and about/boot-skeleton (96 tests).
+  This removes the AGPL-3.0 §13 in-product source offer; the exposure was stated and accepted. The
+  published repo remains the corresponding source. No `sourceCodeUrl`/`source_code`/`UPSTREAM_SOURCE_URL`
+  references remain in `.ts`/`.tsx`; only the historical ROADMAP/CHANGELOG mentions stay.
 - 2026-11-08: The CORS instruction every doc gave was wrong, and is corrected. The deploy steps and
   four READMEs told the operator to add the webmail origin under "Settings > HTTP > CORS allowed
   origins". No such list exists in this build. What exists is one boolean, `usePermissiveCors`, on

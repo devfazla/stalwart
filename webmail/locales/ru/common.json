@@ -2746,8 +2746,7 @@
         "button": "Импортировать"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Исходный код"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

@@ -2746,8 +2746,7 @@
         "contacts_description": "Kontaktu sinhronizācija, adrešu grāmatu darbības un uzticamie sūtītāji"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Pirmkods"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

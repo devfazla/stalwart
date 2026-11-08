@@ -8,7 +8,6 @@ import { SettingsSection, SettingItem, ToggleSwitch } from './settings-section';
 import { Button } from '@/components/ui/button';
 import { usePolicyStore } from '@/stores/policy-store';
 import { useUpdateStore } from '@/stores/update-store';
-import { ExternalLink } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { getPathPrefix, withBasePath } from '@/lib/browser-navigation';
 import { clearCachedData } from '@/lib/clear-cached-data';
@@ -24,7 +23,6 @@ import { DesktopUpdateSettings } from './desktop-update-settings';
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || "0.0.0";
 const GIT_COMMIT = process.env.NEXT_PUBLIC_GIT_COMMIT || "unknown";
-const UPSTREAM_SOURCE_URL = "https://github.com/devfazla/stalwart";
 
 function VersionUpdateTag() {
   const status = useUpdateStore((s) => s.status);
@@ -58,14 +56,14 @@ function VersionUpdateTag() {
 }
 
 /**
- * The About card, on Settings > About and at the foot of the admin's list: logo, version with the
- * update tag, and the source link. A modified build must offer its own
- * source (AGPL-3.0 §13), so a configured URL replaces the upstream link.
- * Three clicks on the logo open Spam Siege, as before.
+ * The About card, on Settings > About and at the foot of the admin's list: logo and version with
+ * the update tag. The source link was removed by operator decision (2026-11-08): this deployment
+ * serves a non-technical audience and carries the AGPL-3.0 §13 source-offer exposure that removal
+ * creates. Three clicks on the logo open Spam Siege, as before.
  */
 export function AboutFooter() {
   const t = useTranslations('settings.advanced');
-  const { sourceCodeUrl, appName, appLogoLightUrl, appLogoDarkUrl } = useConfig();
+  const { appName, appLogoLightUrl, appLogoDarkUrl } = useConfig();
   // A branded deployment (APP_NAME / APP_LOGO_*) shows its own name and logo
   // here; without them the card keeps the Relay Mail mark and title. (#1160)
   const branded = appName && appName !== 'Webmail';
@@ -115,14 +113,6 @@ export function AboutFooter() {
             </p>
           </div>
         </button>
-        <a
-          href={sourceCodeUrl || UPSTREAM_SOURCE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center gap-1 text-[0.6875rem] text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {sourceCodeUrl ? t('about.source_code') : 'GitHub'} <ExternalLink className="w-3 h-3" />
-        </a>
       </div>
     </div>
   );
@@ -130,7 +120,7 @@ export function AboutFooter() {
 
 /**
  * Settings > About, the last entry of the page list: the About card with the
- * version and the source link. It was in the sidebar's footer, where it took
+ * version. It was in the sidebar's footer, where it took
  * room from the page list on short screens. In the desktop app it is "About &
  * updates": the app's version, update check and channel follow the card
  * (on General until the settings reorg of 2026-11-05).

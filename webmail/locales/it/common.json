@@ -2746,8 +2746,7 @@
         "button": "Importa"
       },
       "about": {
-        "title": "Relay Mail",
-        "source_code": "Codice sorgente"
+        "title": "Relay Mail"
       },
       "spam_siege": {
         "title": "Spam Siege",

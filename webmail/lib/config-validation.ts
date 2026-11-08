@@ -67,7 +67,6 @@ const configValidators = {
   jmapServerAutoPickByDomain: isBoolean,
   embeddedMode: isBoolean,
   parentOrigin: isString,
-  sourceCodeUrl: isString,
   accessibilityStatementUrl: isString,
   accessibilityFeedbackUrl: isString,
   helpUrl: isString,
